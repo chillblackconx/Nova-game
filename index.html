@@ -7,119 +7,25 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text x='2' y='28' font-size='22' fill='red' font-family='Orbitron'>RTX</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
-
-    html,body {
-      margin:0; padding:0;
-      background: radial-gradient(circle at 30% 30%, #050505, #0a0a0a 80%);
-      color:white;
-      font-family: 'Orbitron', sans-serif;
-      overflow-x:hidden;
-      cursor: none;
-    }
-
-    h1 {
-      text-align:center;
-      margin-top:60px;
-      font-size:2.5em;
-      color:red;
-      text-shadow:0 0 20px red;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-      gap:20px;
-      padding:40px;
-    }
-
-    .box {
-      border:2px solid red;
-      border-radius:12px;
-      padding:20px;
-      background:rgba(255,0,0,0.05);
-      text-align:center;
-      transition:all 0.25s;
-      box-shadow:0 0 20px rgba(255,0,0,0.3);
-      cursor:pointer;
-    }
-    .box:hover {
-      background:rgba(255,0,0,0.2);
-      transform:translateY(-5px);
-      box-shadow:0 0 30px rgba(255,0,0,0.6);
-    }
-
-    .footer {
-      text-align:center;
-      margin-top:40px;
-      color:#ff4444;
-      font-size:1.2em;
-      text-shadow:0 0 10px red;
-    }
-
-    /* Curseur néon rouge */
-    .cursor {
-      position:fixed;
-      top:0; left:0;
-      width:20px; height:20px;
-      border-radius:50%;
-      background:red;
-      box-shadow:0 0 20px red, 0 0 40px red;
-      pointer-events:none;
-      transform:translate(-50%, -50%);
-      transition:transform 0.05s;
-      z-index:10000;
-    }
-
-    .btn-adapter {
-      display:block;
-      margin:20px auto;
-      background:red;
-      color:white;
-      border:none;
-      font-family:'Orbitron';
-      padding:10px 20px;
-      font-size:1.1em;
-      border-radius:8px;
-      cursor:pointer;
-      box-shadow:0 0 20px red;
-      transition:0.2s;
-    }
-    .btn-adapter:hover {
-      box-shadow:0 0 40px red;
-      transform:scale(1.05);
-    }
-
-    /* Splash Neon Studio */
-    #splash {
-      position:fixed;
-      inset:0;
-      background:black;
-      color:red;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:3em;
-      text-shadow:0 0 30px red;
-      animation:fadeOut 3s forwards;
-      z-index:9999;
-    }
-    @keyframes fadeOut {
-      0% {opacity:1;}
-      80% {opacity:1;}
-      100% {opacity:0; display:none;}
-    }
+    html,body{margin:0;padding:0;background:#050505;color:white;font-family:'Orbitron',sans-serif;overflow-x:hidden;cursor:none;}
+    h1{text-align:center;margin-top:60px;font-size:2.5em;color:red;text-shadow:0 0 20px red;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;padding:40px;}
+    .box{border:2px solid red;border-radius:12px;padding:20px;background:rgba(255,0,0,0.05);text-align:center;transition:all 0.25s;box-shadow:0 0 20px rgba(255,0,0,0.3);cursor:pointer;}
+    .box:hover{background:rgba(255,0,0,0.2);transform:translateY(-5px);box-shadow:0 0 30px rgba(255,0,0,0.6);}
+    .footer{text-align:center;margin-top:40px;color:#ff4444;font-size:1.2em;text-shadow:0 0 10px red;}
+    .cursor{position:fixed;top:0;left:0;width:20px;height:20px;border-radius:50%;background:red;box-shadow:0 0 20px red,0 0 40px red;pointer-events:none;transform:translate(-50%,-50%);transition:transform 0.05s;z-index:10000;}
+    .btn-adapter{display:block;margin:20px auto;background:red;color:white;border:none;font-family:'Orbitron';padding:10px 20px;font-size:1.1em;border-radius:8px;cursor:pointer;box-shadow:0 0 20px red;transition:0.2s;}
+    .btn-adapter:hover{box-shadow:0 0 40px red;transform:scale(1.05);}
+    #splash{position:fixed;inset:0;background:black;color:red;display:flex;align-items:center;justify-content:center;font-size:3em;text-shadow:0 0 30px red;animation:fadeOut 3s forwards;z-index:9999;}
+    @keyframes fadeOut{0%{opacity:1;}80%{opacity:1;}100%{opacity:0;display:none;}}
   </style>
 </head>
 <body>
   <div id="splash">NEON STUDIO</div>
   <h1>NOVA GAME RTX</h1>
-
   <button class="btn-adapter" onclick="window.location.href='adapt.html'">Adapter un jeu</button>
-
   <div class="grid" id="grid"></div>
-
   <div class="footer" id="footer"></div>
-
   <div class="cursor" id="cursor"></div>
 
   <script>
@@ -129,30 +35,32 @@
       cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     });
 
-    // Simulation de scan des fichiers (pas possible directement depuis navigateur)
-    const fichiers = [
-      'space-shottors.rtx.html',
-      'eggbattle.rtx.html'
-    ];
-
     const grid = document.getElementById('grid');
     const footer = document.getElementById('footer');
 
-    if(fichiers.length === 0){
-      footer.textContent = "Désolé, d'autres jeux vont venir — Neon Studio";
-    } else {
-      fichiers.forEach(fichier => {
-        if(fichier.includes('rtx')){
+    // 🔥 Auto-scan dynamique
+    async function scanJeux() {
+      try {
+        const response = await fetch('./'); // essaye de lire le dossier courant
+        const text = await response.text();
+        const fichiers = [...text.matchAll(/href="([^"]+\.rtx\.html)"/g)].map(m => m[1]);
+        if (fichiers.length === 0) {
+          footer.textContent = "Désolé, d'autres jeux vont venir — Neon Studio";
+          return;
+        }
+        fichiers.forEach(fichier => {
           const box = document.createElement('div');
           box.className = 'box';
-          box.textContent = fichier.replace('.rtx.html','').replace(/-/g,' ');
-          box.addEventListener('click', () => {
-            window.open(fichier, "_blank"); // ouvre le jeu dans un nouvel onglet
-          });
+          box.textContent = fichier.replace('.rtx.html','').replace(/[-_]/g,' ');
+          box.addEventListener('click', () => window.open(fichier, '_blank'));
           grid.appendChild(box);
-        }
-      });
+        });
+      } catch {
+        footer.textContent = "Désolé, d'autres jeux vont venir — Neon Studio";
+      }
     }
+
+    scanJeux();
   </script>
 </body>
 </html>
