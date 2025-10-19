@@ -38,35 +38,47 @@ document.addEventListener('keydown',e=>{
     }
 });
 
-// Génération aléatoire d'obstacles
+// Génération de plateformes aléatoires
 function spawnObstacle(){
-    const h=Math.random()*60 + 20;
-    obstacles.push({x:canvas.width,y:canvas.height-h,w:20,h:h});
+    const width=30+Math.random()*50;
+    const height=20+Math.random()*40;
+    obstacles.push({x:canvas.width,y:canvas.height-height,w:width,h:height});
 }
 
 function update(){
     if(gameOver)return;
 
     frameCount++;
-    if(frameCount%100===0 && Math.random()<0.8) spawnObstacle(); // obstacles réguliers
+    if(frameCount%100===0 && Math.random()<0.8) spawnObstacle();
 
     // Gravité
     player.vy+=gravity;
     player.y+=player.vy;
-    if(player.y+player.h>canvas.height){player.y=canvas.height-player.h;player.vy=0;player.jumping=false;}
+    if(player.y+player.h>canvas.height){
+        player.y=canvas.height-player.h;
+        player.vy=0;
+        player.jumping=false;
+    }
 
     // Défilement obstacles
     obstacles.forEach(o=>o.x-=speed);
 
-    // Collision
+    // Collision directionnelle
     for(let o of obstacles){
-        if(player.x+player.w>o.x && player.x<o.x+o.w && player.y+player.h>o.y){
-            gameOver=true;
-            restartBtn.style.display='block';
+        if(player.x+player.w>o.x && player.x<o.x+o.w && player.y+player.h>o.y && player.y<o.y+o.h){
+            // Si le joueur vient d’en haut → atterrissage
+            if(player.y + player.h - player.vy <= o.y){
+                player.y=o.y - player.h;
+                player.vy=0;
+                player.jumping=false;
+            } else {
+                gameOver=true;
+                restartBtn.style.display='block';
+            }
         }
     }
 
-    // Nettoyage obstacles
+    // Nettoyage obstacles hors écran
     obstacles=obstacles.filter(o=>o.x+o.w>0);
 
     // Score
@@ -85,7 +97,7 @@ function draw(){
     ctx.fillStyle='cyan';
     obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
 
-    // Effet de ligne néon (parallaxe)
+    // Lignes néon arrière-plan
     for(let i=0;i<5;i++){
         ctx.strokeStyle='rgba(0,255,255,'+(0.2+i*0.1)+')';
         ctx.beginPath();
