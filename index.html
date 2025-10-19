@@ -44,7 +44,6 @@ function changerNeon(){
     const colors=['red','cyan','magenta','lime','orange','purple'];
     neonColor=colors[Math.floor(Math.random()*colors.length)];
     updateCursor();
-    // changer hover et box shadow
     document.querySelectorAll('.box').forEach(b=>b.style.boxShadow=`0 0 10px ${neonColor}aa`);
 }
 
@@ -68,9 +67,9 @@ async function afficherJeux(){
       const box = document.createElement('div');
       box.className='box';
       const name = a.textContent.trim();
-      const href = a.getAttribute('href'); // pas de /games/
+      const href = a.getAttribute('href'); // <-- utilisé tel quel
       box.innerHTML=`<h2>${name}</h2><p>Jouer</p>`;
-      box.onclick = ()=>window.open(href,'_blank');
+      box.onclick = ()=>window.open(href,'_blank'); // pas de /games/
       cont.appendChild(box);
     });
 
