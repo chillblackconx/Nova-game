@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Créer un jeu - Neon Studio</title>
+<title>Adapter un jeu - Neon Studio</title>
 <style>
 body{
   margin:0;
@@ -32,6 +32,7 @@ button{
   border-radius:10px;
   cursor:pointer;
   margin-bottom:20px;
+  transition:0.3s;
 }
 button:hover{
   background:#ff5555;
@@ -48,9 +49,9 @@ button:hover{
 </head>
 <body>
 
-<h1>Créer un jeu - Neon Studio</h1>
+<h1>Adapter un jeu - Neon Studio</h1>
 
-<p>Écris ton code HTML/JS/CSS ici :</p>
+<p>Colle ton code de jeu ici :</p>
 <textarea id="gameCode"><!DOCTYPE html>
 <html>
 <head><title>Mon jeu RTX</title></head>
@@ -62,7 +63,7 @@ button:hover{
 
 <br>
 <button id="previewBtn">Prévisualiser</button>
-<button id="downloadBtn">Télécharger le jeu</button>
+<button id="convertBtn">Convertir pour le site</button>
 
 <iframe id="preview"></iframe>
 
@@ -70,15 +71,37 @@ button:hover{
 const preview = document.getElementById('preview');
 const textarea = document.getElementById('gameCode');
 
+// Prévisualisation dans l'iframe
 document.getElementById('previewBtn').addEventListener('click',()=>{
   const code = textarea.value;
-  preview.srcdoc = code; // affiche le jeu dans l'iframe
+  // On enveloppe dans une structure HTML minimale
+  const adapted = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mon Jeu RTX</title>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+  preview.srcdoc = adapted;
 });
 
-// Téléchargement du jeu en .rtx.html
-document.getElementById('downloadBtn').addEventListener('click',()=>{
+// Convertir et télécharger en .rtx.html compatible
+document.getElementById('convertBtn').addEventListener('click',()=>{
   const code = textarea.value;
-  const blob = new Blob([code], {type:'text/html'});
+  const adapted = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mon Jeu RTX</title>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+  const blob = new Blob([adapted], {type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   let fileName = prompt("Nom du jeu (sans extension):","MonJeu");
@@ -86,6 +109,7 @@ document.getElementById('downloadBtn').addEventListener('click',()=>{
     if(!fileName.endsWith('.rtx')) fileName += '.rtx';
     a.download = fileName+'.html';
     a.click();
+    alert("Votre jeu est maintenant compatible et peut être placé à côté de index.html !");
   }
 });
 </script>
