@@ -2,109 +2,145 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Nova OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Game / Nova OS</title>
 <style>
-body, html {margin:0;padding:0;width:100%;height:100%;background:#000;font-family:sans-serif;overflow:hidden;}
-#desktop {position:relative;width:100%;height:100%;background:#111;}
-.window {position:absolute;background:#222;border:2px solid #0ff;border-radius:6px;color:#fff;resize:both;overflow:auto;min-width:150px;min-height:100px;}
-.window-header {background:#000;padding:4px;cursor:move;text-align:center;font-weight:bold;}
-#taskbar {position:absolute;bottom:0;width:100%;height:40px;background:#111;border-top:2px solid #0ff;display:flex;align-items:center;padding:0 10px;}
-.taskbar-button {background:#0ff;color:#000;padding:5px 10px;margin-right:5px;border-radius:4px;cursor:pointer;}
-#shop {position:absolute;top:50px;left:50px;width:300px;background:#111;border:2px solid #0ff;padding:10px;display:none;}
-.shop-item {border:2px solid #0ff;margin:5px;padding:5px;cursor:pointer;}
-.shop-item.disabled {opacity:0.4;pointer-events:none;}
+body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:sans-serif;background:#000;color:#fff;}
+#nova-desktop{position:relative;width:100vw;height:100vh;background:#111;display:flex;flex-wrap:wrap;padding:10px;}
+.icon{width:100px;height:100px;margin:10px;background:#222;color:#0ff;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;border:2px solid #444;border-radius:10px;user-select:none;text-align:center;}
+.nova-window{position:absolute;width:400px;height:300px;background:#111;border:2px solid #0ff;border-radius:8px;top:50px;left:50px;display:none;flex-direction:column;z-index:100;box-shadow:0 0 20px #0ff;}
+.window-header{background:#0ff;color:#000;padding:5px;cursor:move;display:flex;justify-content:space-between;align-items:center;font-weight:bold;}
+.window-content{flex:1;padding:10px;overflow:auto;background:#111;}
+.shop-item{padding:5px;margin:5px 0;border:1px solid #0ff;cursor:pointer;display:flex;justify-content:space-between;border-radius:4px;}
+.disabled{opacity:0.3;pointer-events:none;}
+@keyframes proGradient{0%{border-color:#000;color:#000;}50%{border-color:#fff;color:#fff;}100%{border-color:#000;color:#000;}}
+.pro{animation:proGradient 2s linear infinite;}
+#nova-game-window{border:none;}
+#nova-game-iframe{width:100%;height:100%;border:none;}
 </style>
 </head>
 <body>
-<div id="desktop"></div>
 
-<!-- Barre des tâches -->
-<div id="taskbar">
-  <div class="taskbar-button" onclick="toggleShop()">Neon Shop</div>
+<!-- Bureau Nova OS -->
+<div id="nova-desktop">
+  <div class="icon" onclick="openNovaWindow('nova-shop')">Neon Shop</div>
+  <div class="icon" onclick="openNovaWindow('nova-files')">Fichiers</div>
+  <div class="icon" onclick="openNovaWindow('nova-terminal')">Terminal</div>
 </div>
 
-<!-- Shop -->
-<div id="shop"></div>
+<!-- Fenêtres -->
+<div class="nova-window" id="nova-shop">
+  <div class="window-header">Neon Shop <span onclick="closeNovaWindow('nova-shop')">✖</span></div>
+  <div class="window-content" id="nova-shop-content"></div>
+</div>
+
+<div class="nova-window" id="nova-files">
+  <div class="window-header">Explorateur <span onclick="closeNovaWindow('nova-files')">✖</span></div>
+  <div class="window-content" id="nova-files-content">Aucun fichier pour le moment...</div>
+</div>
+
+<div class="nova-window" id="nova-terminal">
+  <div class="window-header">Terminal <span onclick="closeNovaWindow('nova-terminal')">✖</span></div>
+  <div class="window-content">Bienvenue dans Nova OS Terminal !</div>
+</div>
+
+<!-- Fenêtre de jeu RTX plein écran -->
+<div class="nova-window" id="nova-game-window">
+  <div class="window-header">Jeu RTX <span onclick="closeNovaWindow('nova-game-window')">✖</span></div>
+  <div class="window-content"><iframe id="nova-game-iframe"></iframe></div>
+</div>
 
 <script>
-const desktop = document.getElementById('desktop');
-let windows = [];
-let shopVisible = false;
-
-// Shop Items
-let shopItems = [
-  {name:'Bouton',price:100,stock:10,rarity:'Vert'},
-  {name:'Glisser',price:200,stock:5,rarity:'Bleu'},
-  {name:'Animation',price:300,stock:3,rarity:'Violet'},
-  {name:'Effet',price:500,stock:2,rarity:'Jaune'},
-  {name:'Super Module',price:1000,stock:1,rarity:'Rouge'},
-  {name:'Pro Widget',price:2000,stock:1,rarity:'Platinium'}
+// === Détection automatique des jeux RTX ===
+const rtxGames=[
+  {name:"Egg Battle", file:"eggbattle.rtx.html"},
+  {name:"Space Shottors", file:"space-shottors.rtx.html"},
+  {name:"Avoider", file:"avoider.rtx.html"}
 ];
 
-const rarityColors = {
-  'Vert':'#2ecc71',
-  'Bleu':'#3498db',
-  'Violet':'#9b59b6',
-  'Jaune':'#f1c40f',
-  'Rouge':'#e74c3c',
-  'Platinium':'linear-gradient(90deg,#000,#fff)'
-};
+// Ajouter les icônes des jeux sur le bureau
+const desktop=document.getElementById('nova-desktop');
+rtxGames.forEach(g=>{
+  const div=document.createElement('div');
+  div.className='icon';
+  div.innerText=g.name;
+  div.onclick=()=>launchGame(g.file);
+  desktop.appendChild(div);
+});
 
-function toggleShop(){
-  shopVisible = !shopVisible;
-  document.getElementById('shop').style.display = shopVisible?'block':'none';
-  renderShop();
-}
+// === Shop Neon ===
+const novaShopItems=[
+  {name:'Icônes de bureau', rarity:'Vert', price:10, stock:10},
+  {name:'Barre des tâches', rarity:'Vert', price:15, stock:10},
+  {name:'Fenêtres redimensionnables', rarity:'Vert', price:10, stock:10},
+  {name:'Explorateur de fichiers', rarity:'Bleu', price:20, stock:5},
+  {name:'Bloc-notes', rarity:'Bleu', price:10, stock:5},
+  {name:'Animations Neon', rarity:'Violet', price:80, stock:2},
+  {name:'Widgets spéciaux', rarity:'Rouge', price:150, stock:1},
+  {name:'Module Pro', rarity:'Pro', price:300, stock: Math.random()<0.02?1:0},
+  {name:'Module Platinium', rarity:'Platinium', price:500, stock: Math.random()<0.01?1:0}
+];
 
-function renderShop(){
-  const shop = document.getElementById('shop');
-  shop.innerHTML='<h3>Neon Shop</h3>';
-  shopItems.forEach((item,i)=>{
-    const div = document.createElement('div');
-    div.className='shop-item'+(item.stock<=0?' disabled':'');
-    div.style.borderColor=rarityColors[item.rarity]||'#0ff';
+function renderNovaShop(){
+  const container=document.getElementById('nova-shop-content');
+  container.innerHTML='';
+  novaShopItems.forEach((item,i)=>{
+    const div=document.createElement('div');
+    div.className='shop-item';
+    if(item.rarity==='Pro'||item.rarity==='Platinium') div.classList.add('pro');
+    if(item.stock<=0) div.classList.add('disabled');
     div.innerText=`${item.name} (${item.rarity}) - ${item.price} crédits - Stock: ${item.stock}`;
-    div.onclick = ()=>buyFeature(i);
-    shop.appendChild(div);
+    div.onclick=()=>buyNovaItem(i);
+    container.appendChild(div);
   });
 }
 
-function buyFeature(index){
-  const item = shopItems[index];
+function buyNovaItem(i){
+  const item=novaShopItems[i];
   if(item.stock<=0) return;
   item.stock--;
-  createApp(item.name);
-  renderShop();
+  alert(`Vous avez acheté : ${item.name}`);
+  renderNovaShop();
 }
 
-function createApp(name){
-  const win = document.createElement('div');
-  win.className='window';
-  win.style.top=Math.random()*300+'px';
-  win.style.left=Math.random()*300+'px';
-  win.innerHTML = `<div class="window-header">${name}</div><div class="window-content">Contenu de ${name}</div>`;
-  desktop.appendChild(win);
-  makeDraggable(win);
-  windows.push(win);
+// === Fenêtres ===
+function openNovaWindow(id){ 
+  const w=document.getElementById(id); 
+  w.style.display='flex'; 
+  makeNovaDraggable(w);
+  // si fenêtre de jeu, full screen
+  if(id==='nova-game-window'){
+    w.style.top='0px'; w.style.left='0px'; 
+    w.style.width='100vw'; w.style.height='100vh';
+  }
+}
+function closeNovaWindow(id){ 
+  document.getElementById(id).style.display='none';
 }
 
-function makeDraggable(el){
-  const header = el.querySelector('.window-header');
-  let offsetX,offsetY,isDown=false;
-  header.addEventListener('mousedown',e=>{
-    isDown=true;
-    offsetX=e.clientX-el.offsetLeft;
-    offsetY=e.clientY-el.offsetTop;
-  });
-  document.addEventListener('mouseup',()=>isDown=false);
-  document.addEventListener('mousemove',e=>{
-    if(!isDown) return;
-    el.style.left=(e.clientX-offsetX)+'px';
-    el.style.top=(e.clientY-offsetY)+'px';
-  });
+// Drag & Drop pour toutes les fenêtres
+function makeNovaDraggable(el){
+  const header=el.querySelector('.window-header');
+  let offsetX, offsetY, dragging=false;
+  header.onmousedown=(e)=>{ dragging=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop; };
+  document.onmousemove=(e)=>{ if(dragging){ el.style.left=(e.clientX-offsetX)+'px'; el.style.top=(e.clientY-offsetY)+'px'; }};
+  document.onmouseup=()=>dragging=false;
 }
 
-renderShop();
+// === Lancer un jeu RTX plein écran ===
+function launchGame(file){
+  const iframe=document.getElementById('nova-game-iframe');
+  iframe.src=file;
+  openNovaWindow('nova-game-window');
+}
+
+// === Initialisation ===
+renderNovaShop();
+
+// Optionnel : ajouter des raccourcis clavier
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeNovaWindow('nova-game-window');
+});
 </script>
 </body>
 </html>
