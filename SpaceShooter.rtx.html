@@ -2,78 +2,92 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Space Shottors</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Game RTX</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text x='2' y='28' font-size='22' fill='red' font-family='Orbitron'>RTX</text></svg>">
 <style>
-html,body{margin:0;padding:0;height:100%;background:#000;color:white;overflow:hidden;font-family:'Orbitron',sans-serif;}
-#score{position:absolute;top:10px;left:10px;font-size:20px;}
+html,body{margin:0;padding:0;height:100%;background:#000;color:white;font-family:'Orbitron',sans-serif;overflow-x:hidden;}
+h1{text-align:center;margin-top:40px;font-size:2.5em;color:red;text-shadow:0 0 20px red;}
+#splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:black;color:red;font-size:3em;text-shadow:0 0 30px red;animation:fadeOut 3s forwards;z-index:999;}
+@keyframes fadeOut{0%,80%{opacity:1;}100%{opacity:0;display:none;}}
+#container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:80px 30px;opacity:0;transform:translateY(30px);transition:opacity 1s,transform 1s;}
+.box{background:#111;border:1px solid #ff1a1a44;border-radius:16px;padding:20px;text-align:center;cursor:pointer;box-shadow:0 0 10px #f00a;transition:transform 0.3s,box-shadow 0.3s,border 0.3s;}
+.box:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 0 25px #ff2a2a;border-color:#ff2a2a;}
+#msg{text-align:center;font-size:1.2em;color:#ff5555;text-shadow:0 0 10px #f00;}
+.cursor{position:fixed;top:0;left:0;width:20px;height:20px;border-radius:50%;background:red;box-shadow:0 0 20px red,0 0 40px red;pointer-events:none;transform:translate(-50%,-50%);transition:transform 0.05s;z-index:10000;}
+.btn-adapter, .btn-neon{display:block;margin:20px auto;background:red;color:white;border:none;font-family:'Orbitron';padding:10px 20px;font-size:1.1em;border-radius:8px;cursor:pointer;box-shadow:0 0 20px red;transition:0.2s;}
+.btn-adapter:hover, .btn-neon:hover{box-shadow:0 0 40px red;transform:scale(1.05);}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
-<div id="score">Score: 0</div>
+<div id="splash">NEON STUDIO</div>
+<h1>Nova Game RTX</h1>
+<button class="btn-adapter" onclick="window.location.href='adapt.html'">Adapter un jeu</button>
+<button class="btn-neon" onclick="changerNeon()">Changer la couleur du neon</button>
+<div id="container"></div>
+<div id="msg"></div>
+<div class="cursor" id="cursor"></div>
+
 <script>
-let player, cursors, bullets, enemies, score=0, lastFired=0;
+// Curseur néon
+let neonColor='red';
+const cursor=document.getElementById('cursor');
+function updateCursor(){
+    cursor.style.background=neonColor;
+    cursor.style.boxShadow=`0 0 20px ${neonColor},0 0 40px ${neonColor}`;
+}
+document.addEventListener('mousemove',e=>{cursor.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;});
+updateCursor();
 
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: { default: 'arcade', arcade: { debug: false } },
-    scene: { preload, create, update }
-};
-
-const game = new Phaser.Game(config);
-
-function preload(){
-    this.load.image('player','https://i.imgur.com/6QxNQkK.png'); // simple player
-    this.load.image('bullet','https://i.imgur.com/Q8t8XnL.png');
-    this.load.image('enemy','https://i.imgur.com/Fb6Xhcd.png');
+// Changer la couleur du neon
+function changerNeon(){
+    const colors=['red','cyan','magenta','lime','orange','purple'];
+    neonColor=colors[Math.floor(Math.random()*colors.length)];
+    updateCursor();
+    document.querySelectorAll('.box').forEach(b=>b.style.boxShadow=`0 0 10px ${neonColor}aa`);
 }
 
-function create(){
-    player = this.physics.add.sprite(400,550,'player').setCollideWorldBounds(true);
-    bullets = this.physics.add.group();
-    enemies = this.physics.add.group();
+// Récupération des jeux depuis game.html
+async function afficherJeux(){
+  const cont=document.getElementById('container');
+  const msg=document.getElementById('msg');
+  try {
+    const resp = await fetch('game.html');
+    const htmlText = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const links = doc.querySelectorAll('#game-list a');
 
-    cursors = this.input.keyboard.createCursorKeys();
-    this.input.keyboard.on('keydown-SPACE', ()=>shoot(this));
+    if(links.length===0){
+      msg.innerHTML="D’autres jeux vont venir — <b>Neon Studio</b>";
+      return;
+    }
 
-    this.time.addEvent({delay:1500, callback:spawnEnemy, callbackScope:this, loop:true});
-    this.physics.add.overlap(bullets,enemies,onBulletHit,null,this);
-}
-
-function update(){
-    let vx=0;
-    if(cursors.left.isDown) vx=-300;
-    if(cursors.right.isDown) vx=300;
-    player.setVelocityX(vx);
-
-    bullets.children.iterate(b=>{
-        if(b && b.y<0) b.destroy();
+    links.forEach(a=>{
+      const box = document.createElement('div');
+      box.className='box';
+      const name = a.textContent.trim();
+      const href = a.getAttribute('href'); // utilisé tel quel, plus de /games/
+      box.innerHTML=`<h2>${name}</h2><p>Jouer</p>`;
+      box.onclick = ()=>window.open(href,'_blank');
+      cont.appendChild(box);
     });
+
+    cont.style.opacity='1';
+    cont.style.transform='translateY(0)';
+  } catch(e){
+    msg.innerHTML="Impossible de charger les jeux 😢";
+  }
 }
 
-function shoot(scene){
-    const now = scene.time.now;
-    if(now - lastFired < 300) return;
-    lastFired = now;
-    const bullet = bullets.create(player.x, player.y-20,'bullet');
-    bullet.setVelocityY(-500);
-}
-
-function spawnEnemy(){
-    const x = Phaser.Math.Between(50,750);
-    const e = enemies.create(x,0,'enemy');
-    e.setVelocityY(Phaser.Math.Between(50,150));
-}
-
-function onBulletHit(bullet,enemy){
-    bullet.destroy();
-    enemy.destroy();
-    score+=10;
-    document.getElementById('score').innerText='Score: '+score;
-}
+// Splash Neon Studio + affichage des jeux
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('splash').style.opacity='0';
+    setTimeout(()=>document.getElementById('splash').remove(),800);
+    afficherJeux();
+  },2500);
+});
 </script>
 </body>
 </html>
