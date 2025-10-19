@@ -15,8 +15,7 @@ body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
 .disabled{opacity:0.3;pointer-events:none;}
 @keyframes proGradient{0%{border-color:#000;color:#000;}50%{border-color:#fff;color:#fff;}100%{border-color:#000;color:#000;}}
 .pro{animation:proGradient 2s linear infinite;}
-#nova-game-window{border:none;}
-#nova-game-iframe{width:100%;height:100%;border:none;}
+#nova-game-iframe,#browser-iframe{width:100%;height:100%;border:none;}
 #taskbar{position:absolute;bottom:0;left:0;width:100%;height:40px;background:#111;display:flex;align-items:center;padding:0 10px;border-top:2px solid #0ff;}
 .task-icon{width:30px;height:30px;margin-right:5px;background:#222;border-radius:5px;display:flex;justify-content:center;align-items:center;color:#0ff;cursor:pointer;}
 </style>
@@ -28,6 +27,7 @@ body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
   <div class="icon" onclick="openNovaWindow('nova-shop')">Neon Shop</div>
   <div class="icon" onclick="openNovaWindow('nova-files')">Fichiers</div>
   <div class="icon" onclick="openNovaWindow('nova-terminal')">Terminal</div>
+  <div class="icon" onclick="openBrowser()">Navigateur</div>
 </div>
 
 <!-- Barre des tâches -->
@@ -55,15 +55,29 @@ body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
   <div class="window-content"><iframe id="nova-game-iframe"></iframe></div>
 </div>
 
+<!-- Navigateur réel -->
+<div class="nova-window" id="nova-browser">
+  <div class="window-header">Navigateur <span onclick="closeNovaWindow('nova-browser')">✖</span></div>
+  <div class="window-content" style="display:flex; flex-direction:column; height:100%;">
+    <div style="display:flex; padding:5px;">
+      <button onclick="goBack()">◀</button>
+      <button onclick="goForward()">▶</button>
+      <button onclick="refreshPage()">⟳</button>
+      <input id="browser-url" type="text" placeholder="https://www.google.com" style="flex:1; margin:0 5px; padding:5px;">
+      <button onclick="goToURL()">Aller</button>
+    </div>
+    <iframe id="browser-iframe" src="https://www.google.com"></iframe>
+  </div>
+</div>
+
 <script>
-// === Détection automatique des jeux RTX ===
+// === Jeux RTX ===
 const rtxGames=[
   {name:"Egg Battle", file:"eggbattle.rtx.html"},
   {name:"Space Shottors", file:"space-shottors.rtx.html"},
   {name:"Avoider", file:"avoider.rtx.html"}
 ];
 
-// Ajouter les icônes des jeux sur le bureau
 const desktop=document.getElementById('nova-desktop');
 rtxGames.forEach(g=>{
   const div=document.createElement('div');
@@ -111,16 +125,11 @@ function buyNovaItem(i){
 // === Restock automatique toutes les 5 minutes ===
 function restockNovaShop(){
   novaShopItems.forEach(item=>{
-    if(item.rarity==='Pro'){
-      item.stock = Math.random() < 0.05 ? 1 : 0; // 5% chance
-    } else if(item.rarity==='Platinium'){
-      item.stock = Math.random() < 0.02 ? 1 : 0; // 2% chance
-    } else {
-      item.stock = Math.max(item.stock, Math.floor(Math.random()*5+1));
-    }
+    if(item.rarity==='Pro'){ item.stock = Math.random() < 0.05 ? 1 : 0; }
+    else if(item.rarity==='Platinium'){ item.stock = Math.random() < 0.02 ? 1 : 0; }
+    else{ item.stock = Math.max(item.stock, Math.floor(Math.random()*5+1)); }
   });
   renderNovaShop();
-  console.log('Shop restocké !');
 }
 setInterval(restockNovaShop, 300000);
 
@@ -129,39 +138,46 @@ function openNovaWindow(id){
   const w=document.getElementById(id); 
   w.style.display='flex'; 
   makeNovaDraggable(w);
-  if(id==='nova-game-window'){w.style.top='0px'; w.style.left='0px'; w.style.width='100vw'; w.style.height='100vh';}
+  if(id==='nova-game-window'||id==='nova-browser'){
+    w.style.top='0px'; w.style.left='0px'; w.style.width='100vw'; w.style.height='100vh';
+  }
 }
 function closeNovaWindow(id){ document.getElementById(id).style.display='none';}
-
-// Drag & Drop pour toutes les fenêtres
 function makeNovaDraggable(el){
   const header=el.querySelector('.window-header');
   let offsetX, offsetY, dragging=false;
   header.onmousedown=(e)=>{ dragging=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop; };
-  document.onmousemove=(e)=>{ if(dragging){ el.style.left=(e.clientX-offsetX)+'px'; el.style.top=(e.clientY-offsetY)+'px'; }};
-  document.onmouseup=()=>dragging=false;
+  document.onmousemove=(e)=>{ if(dragging){ el.style.left=(e.clientX-offsetX)+'px'; el.style.top=(e.clientY-offsetY)+'px'; } };
+  document.onmouseup=()=>{ dragging=false; };
 }
 
-// === Lancer un jeu RTX plein écran ===
+// === Jeux RTX launch ===
 function launchGame(file){
-  const iframe=document.getElementById('nova-game-iframe');
-  iframe.src=file;
+  document.getElementById('nova-game-iframe').src=file;
   openNovaWindow('nova-game-window');
 }
 
-// === Barre des tâches ===
-const taskbar=document.getElementById('taskbar');
-function addTaskIcon(name){
-  const icon=document.createElement('div');
-  icon.className='task-icon';
-  icon.innerText=name[0];
-  taskbar.appendChild(icon);
+// === Navigateur ===
+const historyStack=[];
+let currentIndex=-1;
+function goToURL(){
+  const url=document.getElementById('browser-url').value;
+  if(!url) return;
+  const iframe=document.getElementById('browser-iframe');
+  iframe.src=url;
+  historyStack.splice(currentIndex+1);
+  historyStack.push(url);
+  currentIndex++;
 }
-addTaskIcon('Nova OS'); // exemple initial
+function goBack(){ if(currentIndex>0){ currentIndex--; updateBrowser(); } }
+function goForward(){ if(currentIndex<historyStack.length-1){ currentIndex++; updateBrowser(); } }
+function refreshPage(){ if(currentIndex>=0){ document.getElementById('browser-iframe').src=historyStack[currentIndex]; } }
+function updateBrowser(){ document.getElementById('browser-iframe').src=historyStack[currentIndex]; document.getElementById('browser-url').value=historyStack[currentIndex]; }
+function openBrowser(){ openNovaWindow('nova-browser'); }
 
 // === Initialisation ===
 renderNovaShop();
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeNovaWindow('nova-game-window');});
+openBrowser();
 </script>
 </body>
 </html>
