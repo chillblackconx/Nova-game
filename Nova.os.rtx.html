@@ -6,186 +6,65 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
-body {
-  margin:0;
-  padding:0;
-  overflow:hidden;
-  background:#0a0a0a;
-  font-family:'Orbitron',sans-serif;
-  cursor:none;
-}
-
-#cursor{
-  position:absolute;
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:red;
-  pointer-events:none;
-  box-shadow:0 0 15px red,0 0 30px cyan;
-  mix-blend-mode:screen;
-  z-index:1000;
-  transition:0.05s linear;
-}
-
-#desktop{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  background:linear-gradient(135deg,#0b0b0b,#1a1a1a);
-}
-
-.icon{
-  width:100px;
-  height:100px;
-  background:rgba(10,10,10,0.6);
-  color:#0ff;
-  text-align:center;
-  line-height:100px;
-  margin:15px;
-  display:inline-block;
-  border:2px solid #0ff;
-  border-radius:15px;
-  cursor:pointer;
-  user-select:none;
-  transition:0.3s;
-  backdrop-filter:blur(5px);
-}
-.icon:hover{
-  box-shadow:0 0 20px #0ff,0 0 40px cyan;
-  transform:scale(1.05);
-}
-
-.window{
-  position:absolute;
-  width:500px;
-  height:350px;
-  background:rgba(10,10,10,0.85);
-  border-radius:15px;
-  display:none;
-  flex-direction:column;
-  z-index:10;
-  backdrop-filter:blur(8px);
-  box-shadow:0 0 20px #0ff,0 0 40px cyan;
-}
-
-.window-header{
-  height:40px;
-  background:rgba(0,0,0,0.5);
-  border-bottom:1px solid #0ff;
-  padding:5px 10px;
-  cursor:move;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  color:#0ff;
-}
-
-.window-header span:hover{
-  color:red;
-  cursor:pointer;
-}
-
-.window-content{
-  flex:1;
-  padding:10px;
-  color:#0ff;
-  overflow:auto;
-}
-
-#taskbar{
-  position:absolute;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:50px;
-  background:rgba(0,0,0,0.5);
-  backdrop-filter:blur(8px);
-  display:flex;
-  align-items:center;
-  padding:0 10px;
-  border-top:1px solid #0ff;
-}
-
-.taskbar-button{
-  color:#0ff;
-  background:rgba(10,10,10,0.6);
-  border:1px solid #0ff;
-  border-radius:10px;
-  padding:5px 10px;
-  margin-right:10px;
-  cursor:pointer;
-  transition:0.3s;
-}
-.taskbar-button:hover{
-  box-shadow:0 0 10px #0ff;
-  background:rgba(10,10,10,0.8);
-}
-
-#shop{
-  position:absolute;
-  top:60px;
-  left:50%;
-  transform:translateX(-50%);
-  width:450px;
-  height:300px;
-  background:rgba(10,10,10,0.9);
-  border-radius:15px;
-  display:none;
-  flex-direction:column;
-  z-index:20;
-  backdrop-filter:blur(8px);
-  box-shadow:0 0 25px #0ff,0 0 50px cyan;
-}
-
-#shop h2{
-  color:#0ff;
-  text-align:center;
-  margin:10px 0;
-}
-
-.shop-item{
-  background:rgba(10,10,10,0.6);
-  margin:5px;
-  padding:8px;
-  border:1px solid #0ff;
-  border-radius:10px;
-  cursor:pointer;
-  transition:0.3s;
-}
-.shop-item:hover{
-  box-shadow:0 0 15px #0ff,0 0 25px cyan;
-  transform:scale(1.05);
-}
+body{margin:0;padding:0;overflow:hidden;background:#0a0a0a;font-family:'Orbitron',sans-serif;cursor:none;}
+#cursor{position:absolute;width:20px;height:20px;border-radius:50%;background:red;pointer-events:none;box-shadow:0 0 15px red,0 0 30px cyan;mix-blend-mode:screen;z-index:1000;transition:0.05s linear;}
+#desktop{position:relative;width:100vw;height:100vh;overflow:hidden;background:linear-gradient(135deg,#0b0b0b,#1a1a1a);}
+.icon{width:100px;height:100px;background:rgba(10,10,10,0.6);color:#0ff;text-align:center;line-height:100px;margin:15px;display:inline-block;border:2px solid #0ff;border-radius:15px;cursor:pointer;user-select:none;transition:0.3s;backdrop-filter:blur(5px);}
+.icon:hover{box-shadow:0 0 20px #0ff,0 0 40px cyan;transform:scale(1.05);}
+.window{position:absolute;width:500px;height:350px;background:rgba(10,10,10,0.85);border-radius:15px;display:none;flex-direction:column;z-index:10;backdrop-filter:blur(8px);box-shadow:0 0 20px #0ff,0 0 40px cyan;}
+.window-header{height:40px;background:rgba(0,0,0,0.5);border-bottom:1px solid #0ff;padding:5px 10px;cursor:move;display:flex;justify-content:space-between;align-items:center;color:#0ff;}
+.window-header span:hover{color:red;cursor:pointer;}
+.window-content{flex:1;padding:10px;color:#0ff;overflow:auto;}
+#taskbar{position:absolute;bottom:0;left:0;width:100%;height:50px;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;padding:0 10px;border-top:1px solid #0ff;}
+.taskbar-button{color:#0ff;background:rgba(10,10,10,0.6);border:1px solid #0ff;border-radius:10px;padding:5px 10px;margin-right:10px;cursor:pointer;transition:0.3s;}
+.taskbar-button:hover{box-shadow:0 0 10px #0ff;background:rgba(10,10,10,0.8);}
+#shop{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:450px;height:300px;background:rgba(10,10,10,0.9);border-radius:15px;display:none;flex-direction:column;z-index:20;backdrop-filter:blur(8px);box-shadow:0 0 25px #0ff,0 0 50px cyan;}
+#shop h2{color:#0ff;text-align:center;margin:10px 0;}
+.shop-item{background:rgba(10,10,10,0.6);margin:5px;padding:8px;border:1px solid #0ff;border-radius:10px;cursor:pointer;transition:0.3s;}
+.shop-item:hover{box-shadow:0 0 15px #0ff,0 0 25px cyan;transform:scale(1.05);}
+textarea{width:100%;height:150px;background:#111;color:#0ff;border:1px solid #0ff;border-radius:10px;padding:5px;resize:none;}
+button{background:#0ff;color:#000;border:none;padding:5px 10px;border-radius:10px;margin-top:5px;cursor:pointer;}
+button:hover{background:#0cc;}
 </style>
 </head>
 <body>
-
 <div id="desktop"></div>
 <div id="cursor"></div>
 
 <!-- Taskbar -->
 <div id="taskbar">
   <div class="taskbar-button" onclick="toggleShop()">Neon Shop</div>
+  <div class="taskbar-button" onclick="openEditor()">Créer une App/Jeu</div>
 </div>
 
-<!-- Fenêtre mini-jeu -->
-<div class="window" id="gameWindow">
+<!-- Fenêtre mini-jeu / appli -->
+<div class="window" id="appWindow">
   <div class="window-header">
-    Mini-jeu
-    <span onclick="closeWindow('gameWindow')">✖</span>
+    Application
+    <span onclick="closeWindow('appWindow')">✖</span>
   </div>
-  <div class="window-content" id="gameContent">Mini-jeu ici</div>
+  <div class="window-content" id="appContent">Mini-jeu ou application ici</div>
 </div>
 
-<!-- Neon Shop -->
+<!-- Shop -->
 <div id="shop">
   <h2>Neon Shop</h2>
   <div class="shop-item" onclick="buyFeature('Gravité inversée')">Gravité inversée (Rare) - 500 crédits</div>
   <div class="shop-item" onclick="buyFeature('Plateforme mobile')">Plateforme mobile (Épique) - 800 crédits</div>
   <div class="shop-item" onclick="buyFeature('Power-up +')">Power-up + (Légendaire) - 1500 crédits</div>
+</div>
+
+<!-- Editeur -->
+<div class="window" id="editorWindow">
+  <div class="window-header">
+    Editeur Nova OS
+    <span onclick="closeWindow('editorWindow')">✖</span>
+  </div>
+  <div class="window-content">
+    <textarea id="editorCode">// Code JS / HTML de ton application</textarea>
+    <button onclick="installApp()">Installer l'application</button>
+    <div id="editorOutput"></div>
+  </div>
 </div>
 
 <script>
@@ -196,35 +75,33 @@ document.addEventListener('mousemove',e=>{
   cursor.style.top=e.clientY-10+'px';
 });
 
-// Bureau et icônes
+// Bureau
 const desktop=document.getElementById('desktop');
-const apps=[
-  {name:'Egg Battle',id:'egg',game:'<p>Egg Battle jouable ici</p>'},
-  {name:'Avoider',id:'avoider',game:'<p>Avoider jouable ici</p>'},
-  {name:'Neon Dash',id:'dash',game:'<p>Neon Dash jouable ici</p>'}
-];
-apps.forEach(app=>{
-  const div=document.createElement('div');
-  div.className='icon';
-  div.innerText=app.name;
-  div.onclick=()=>openGame(app);
-  desktop.appendChild(div);
-});
+let appsInstalled=[];
 
-// Ouvrir mini-jeu
-function openGame(app){
-  const win=document.getElementById('gameWindow');
-  const content=document.getElementById('gameContent');
-  content.innerHTML=app.game;
+function renderDesktop(){
+  desktop.innerHTML='';
+  appsInstalled.forEach(app=>{
+    const div=document.createElement('div');
+    div.className='icon';
+    div.innerText=app.name;
+    div.onclick=()=>openApp(app);
+    desktop.appendChild(div);
+  });
+}
+
+// Ouvrir appli
+function openApp(app){
+  const win=document.getElementById('appWindow');
+  const content=document.getElementById('appContent');
+  content.innerHTML=app.code;
   win.style.display='flex';
   win.style.left='100px';
   win.style.top='100px';
 }
 
 // Fermer fenêtre
-function closeWindow(id){
-  document.getElementById(id).style.display='none';
-}
+function closeWindow(id){document.getElementById(id).style.display='none';}
 
 // Drag fenêtre
 let dragObj=null, offsetX=0, offsetY=0;
@@ -242,14 +119,26 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('mouseup',()=>dragObj=null);
 
-// Neon Shop
+// Shop
 function toggleShop(){
   const shop=document.getElementById('shop');
   shop.style.display=shop.style.display==='flex'?'none':'flex';
 }
+function buyFeature(name){alert('Vous avez acheté: '+name);}
 
-function buyFeature(name){
-  alert('Vous avez acheté: '+name);
+// Editeur
+function openEditor(){
+  document.getElementById('editorWindow').style.display='flex';
+}
+function installApp(){
+  const code=document.getElementById('editorCode').value;
+  if(!code.trim()){ alert('Code vide !'); return;}
+  const name=prompt('Nom de l\'application:');
+  if(!name) return;
+  appsInstalled.push({name:name,code:code});
+  renderDesktop();
+  document.getElementById('editorOutput').innerHTML='<p style="color:#0f0">Application installée !</p>';
+  document.getElementById('editorCode').value='';
 }
 </script>
 </body>
