@@ -13,37 +13,37 @@ body{
   color:#fff;
   text-align:center;
   cursor:none;
+  overflow-x:hidden;
 }
+
+/* Logo Neon Studio au chargement */
 #logo{
-  font-size:2.5em;
+  font-size:3em;
   font-weight:bold;
-  color:#f00; /* néon rouge */
-  text-shadow:0 0 10px #f00,0 0 20px #f00,0 0 30px #800,0 0 40px #800;
+  color:#f00;
+  text-shadow:0 0 15px #f00,0 0 30px #f00,0 0 45px #800,0 0 60px #800;
   margin:50px 0 30px 0;
-  opacity:0;
-  animation:fadeIn 2s forwards;
+  opacity:1;
+  transition: opacity 2s ease-out;
 }
-@keyframes fadeIn{
-  to{opacity:1;}
-}
+
+/* Grille de jeux */
 #gameGrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:20px;
   padding:20px;
   opacity:0;
-  animation:fadeInGrid 1s forwards 2s;
+  transition: opacity 2s ease-in;
 }
-@keyframes fadeInGrid{
-  to{opacity:1;}
-}
+
+/* Boxes de jeux */
 .gameBox{
-  background:#111;
+  background:rgba(20,20,30,0.8);
   border:1px solid #f00;
   border-radius:15px;
   padding:10px;
   cursor:pointer;
-  transition:0.3s;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -51,6 +51,7 @@ body{
   height:100px;
   position:relative;
   overflow:hidden;
+  transition:0.3s;
 }
 .gameBox:hover{
   transform:scale(1.05);
@@ -66,6 +67,8 @@ body{
   border-radius:15px;
   opacity:0.2;
 }
+
+/* Curseur néon rouge */
 #neonCursor{
   position:fixed;
   top:0;
@@ -80,6 +83,8 @@ body{
   z-index:1000;
   opacity:1;
 }
+
+/* Message si aucun jeu */
 .message{
   margin-top:30px;
   font-size:1.5em;
@@ -100,10 +105,12 @@ body{
 <div id="neonCursor"></div>
 
 <script>
+// Fade out du logo après 3s
+setTimeout(()=>{document.getElementById('logo').style.opacity='0'; document.getElementById('gameGrid').style.opacity='1';},3000);
+
 // Curseur néon rouge qui disparaît après 3s d'inactivité
 const neon=document.getElementById('neonCursor');
 let timeout;
-
 document.addEventListener('mousemove',e=>{
   neon.style.transform=`translate(${e.clientX-10}px, ${e.clientY-10}px)`;
   neon.style.opacity='1';
@@ -111,17 +118,16 @@ document.addEventListener('mousemove',e=>{
   timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000);
 });
 
-// Liste des fichiers possibles (manuellement)
+// Liste des fichiers possibles
 const allFiles=[
   "Avoider.rtx.html",
   "SpaceShooter.rtx.html",
-  "Puzzle.rtx.html",
   "Runner.rtx.html",
   "Maze.rtx.html"
 ];
 
 const grid=document.getElementById('gameGrid');
-let boxCount=0; // nombre de jeux existants
+let boxCount=0;
 
 function createPreview(box,file){
   const canvas=document.createElement('canvas');
@@ -141,7 +147,7 @@ function createPreview(box,file){
   animate();
 }
 
-// Vérifie si le fichier existe avant de créer la box
+// Vérifie l’existence du fichier avant de créer une box
 allFiles.forEach(file=>{
   if(file.includes('.rtx')){
     fetch(file,{method:'HEAD'}).then(res=>{
@@ -151,28 +157,14 @@ allFiles.forEach(file=>{
         box.className='gameBox';
         box.textContent=file.replace('.rtx.html','');
         createPreview(box,file);
-
-        // Pulse curseur sur hover
-        box.addEventListener('mouseenter',()=>{
-          neon.style.transition='transform 0.05s ease-out, opacity 0.2s';
-          neon.style.transform+=' scale(2)';
-          neon.style.boxShadow='0 0 20px #f00,0 0 40px #f00,0 0 60px #f00,0 0 80px #800,0 0 100px #800';
-        });
-        box.addEventListener('mouseleave',()=>{
-          neon.style.transform=neon.style.transform.replace(' scale(2)','');
-          neon.style.boxShadow='0 0 10px #f00,0 0 20px #f00,0 0 30px #f00,0 0 40px #800,0 0 50px #800';
-        });
-
-        // Clique → ouvre le jeu directement
         box.addEventListener('click',()=>{ window.location.href=file; });
-
         grid.appendChild(box);
       }
     });
   }
 });
 
-// Si aucun jeu n’existe, affiche un message
+// Message si aucun jeu trouvé
 setTimeout(()=>{
   if(boxCount===0){
     const msg=document.createElement('div');
@@ -180,7 +172,8 @@ setTimeout(()=>{
     msg.textContent="Désolé, d'autres jeux vont venir ! – Neon Studio";
     grid.appendChild(msg);
   }
-},500); // délai pour que fetch ait le temps de vérifier
+},500);
+
 </script>
 </body>
 </html>
