@@ -26,17 +26,46 @@ h1{text-align:center;margin-top:40px;font-size:2.5em;color:red;text-shadow:0 0 2
 <div id="container"></div>
 <div id="msg"></div>
 <div class="cursor" id="cursor"></div>
+
 <script>
 // Curseur néon
 const cursor=document.getElementById('cursor');
 document.addEventListener('mousemove',e=>{cursor.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;});
 
-// Liste des jeux disponibles
-const jeux=[
-  "eggbattle.rtx.html",
-  "space-shottors.rtx.html"
-];
+// Récupération des jeux depuis game.html
+async function afficherJeux(){
+  const cont=document.getElementById('container');
+  const msg=document.getElementById('msg');
+  try {
+    const resp = await fetch('game.html');
+    const htmlText = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const links = doc.querySelectorAll('#game-list a');
 
+    if(links.length===0){
+      msg.innerHTML="D’autres jeux vont venir — <b>Neon Studio</b>";
+      return;
+    }
+
+    links.forEach(a=>{
+      const box = document.createElement('div');
+      box.className='box';
+      const name = a.textContent.trim();
+      const href = a.getAttribute('href');
+      box.innerHTML=`<h2>${name}</h2><p>Jouer</p>`;
+      box.onclick = ()=>window.open(href,'_blank');
+      cont.appendChild(box);
+    });
+
+    cont.style.opacity='1';
+    cont.style.transform='translateY(0)';
+  } catch(e){
+    msg.innerHTML="Impossible de charger les jeux 😢";
+  }
+}
+
+// Splash Neon Studio + affichage des jeux
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     document.getElementById('splash').style.opacity='0';
@@ -44,24 +73,6 @@ window.addEventListener('load',()=>{
     afficherJeux();
   },2500);
 });
-
-function afficherJeux(){
-  const cont=document.getElementById('container');
-  const msg=document.getElementById('msg');
-  if(jeux.length===0){
-    msg.innerHTML="D’autres jeux vont venir — <b>Neon Studio</b>";
-    return;
-  }
-  jeux.forEach(f=>{
-    const box=document.createElement('div');
-    box.className='box';
-    box.innerHTML=`<h2>${f.replace('.rtx.html','').replace(/[-_]/g,' ')}</h2><p>Jouer</p>`;
-    box.onclick=()=>window.open(f,'_blank');
-    cont.appendChild(box);
-  });
-  cont.style.opacity='1';
-  cont.style.transform='translateY(0)';
-}
 </script>
 </body>
 </html>
