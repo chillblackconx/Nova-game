@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nova Game - Ultimate Friv</title>
+<style>
+body{margin:0;padding:0;font-family:Arial,sans-serif;background:#111;color:#fff;text-align:center;}
+h1{background:#222;padding:20px;margin:0;font-size:2em;color:#ffcc00;text-shadow:1px 1px #000;}
+#gameGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;padding:20px;}
+.gameCard{background:#333;padding:10px;border-radius:10px;cursor:pointer;transition:0.3s;position:relative;overflow:hidden;height:140px;display:flex;align-items:center;justify-content:center;}
+.gameCard:hover{transform:scale(1.05);background:#555;box-shadow:0 0 15px #ff0;}
+.gameCard canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;border-radius:10px;}
+.gameCard span{position:relative;z-index:1;font-weight:bold;}
+button{padding:10px 20px;margin:5px;font-size:16px;cursor:pointer;border:none;border-radius:5px;background:#444;color:#fff;transition:0.2s;}
+button:hover{background:#666;}
+.hidden{display:none;}
+#gameModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:20px;border-radius:12px;width:450px;box-shadow:0 0 25px #000;z-index:100;}
+#gameCode{width:100%;height:200px;margin-bottom:10px;background:#111;color:#fff;border:1px solid #555;padding:5px;font-family:monospace;}
+#gameCanvas{border:2px solid #fff;margin-top:20px;background:#000;display:block;margin-left:auto;margin-right:auto;}
+#sizeSelect{margin-bottom:10px;padding:5px;font-size:14px;}
+</style>
+</head>
+<body>
+
+<h1>Nova Game - Ultimate Friv</h1>
+<div id="gameGrid"></div>
+<button id="createGameBtn">Créer un nouveau jeu</button>
+
+<div id="gameModal" class="hidden">
+<h2>Créer ton jeu</h2>
+<select id="sizeSelect">
+<option value="200">Petit 200x200</option>
+<option value="400" selected>Moyen 400x400</option>
+<option value="600">Grand 600x600</option>
+</select>
+<textarea id="gameCode">// Exemple : cercle animé
+function setup(ctx,canvas){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='red';
+ctx.beginPath();
+ctx.arc(canvas.width/2,canvas.height/2,50,0,Math.PI*2);
+ctx.fill();
+}</textarea><br>
+<button id="saveGameBtn">Ajouter</button>
+<button id="closeModalBtn">Fermer</button>
+</div>
+
+<canvas id="gameCanvas" width="400" height="400" class="hidden"></canvas>
+
+<script>
+// === Variables ===
+const gameGrid=document.getElementById('gameGrid'),
+createBtn=document.getElementById('createGameBtn'),
+modal=document.getElementById('gameModal'),
+closeModalBtn=document.getElementById('closeModalBtn'),
+saveGameBtn=document.getElementById('saveGameBtn'),
+gameCodeArea=document.getElementById('gameCode'),
+canvas=document.getElementById('gameCanvas'),
+ctx=canvas.getContext('2d'),
+sizeSelect=document.getElementById('sizeSelect');
+
+// Chargement des jeux
+let games=JSON.parse(localStorage.getItem('novaGames'))||[];
+
+// === Grille animée avec mini-canvas ===
+function renderGrid(){
+  gameGrid.innerHTML='';
+  games.forEach((g,i)=>{
+    const card=document.createElement('div');
+    card.className='gameCard';
+    const preview=document.createElement('canvas');
+    preview.width=140; preview.height=140;
+    const pctx=preview.getContext('2d');
+    card.appendChild(preview);
+    const title=document.createElement('span');
+    title.textContent=g.name;
+    card.appendChild(title);
+    card.onclick=()=>runGame(g.code,g.size||400);
+    gameGrid.appendChild(card);
+    // Mini preview animée
+    try{new Function('ctx','canvas',g.code+'\nsetup(ctx,canvas)')(pctx,preview);}catch(e){}
+  });
+}
+
+// === Lancer un jeu ===
+function runGame(code,size){
+  canvas.width=size;
+  canvas.height=size;
+  canvas.classList.remove('hidden');
+  try{new Function('ctx','canvas',code+'\nsetup(ctx,canvas)')(ctx,canvas);}
+  catch(e){alert('Erreur : '+e.message);}
+}
+
+// === Modal ===
+createBtn.onclick=()=>modal.classList.remove('hidden');
+closeModalBtn.onclick=()=>modal.classList.add('hidden');
+
+// === Ajouter un jeu ===
+saveGameBtn.onclick=()=>{
+  const code=gameCodeArea.value;
+  const size=parseInt(sizeSelect.value);
+  if(!code.trim())return alert('Écris du code !');
+  const name=prompt('Nom du jeu :')||`Jeu ${games.length+1}`;
+  games.push({name,code,size});
+  localStorage.setItem('novaGames',JSON.stringify(games));
+  renderGrid();
+  gameCodeArea.value='';
+  modal.classList.add('hidden');
+}
+
+// === Jeux par défaut si aucun ===
+if(games.length===0){
+  const defaultGames=[
+    {name:'Cercle Animé',code:"let a=0;function setup(ctx,canvas){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='red';ctx.beginPath();ctx.arc(canvas.width/2+Math.sin(a)*30,canvas.height/2+Math.cos(a)*30,20,0,Math.PI*2);ctx.fill();a+=0.1;requestAnimationFrame(()=>setup(ctx,canvas));}",size:140},
+    {name:'Carré Animé',code:"let s=0;function setup(ctx,canvas){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='green';ctx.fillRect(20+s,20+s,canvas.width-40,canvas.height-40);s+=1;s%=canvas.width/2;requestAnimationFrame(()=>setup(ctx,canvas));}",size:140},
+    {name:'Triangle',code:"function setup(ctx,canvas){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='yellow';ctx.beginPath();ctx.moveTo(canvas.width/2,20);ctx.lineTo(20,canvas.height-20);ctx.lineTo(canvas.width-20,canvas.height-20);ctx.closePath();ctx.fill();}",size:140}
+  ];
+  games=defaultGames;
+  localStorage.setItem('novaGames',JSON.stringify(games));
+}
+
+// Initialisation
+renderGrid();
+</script>
+</body>
+</html>
