@@ -13,7 +13,7 @@ body{
 }
 textarea{
   width:90%;
-  height:300px;
+  height:200px;
   margin:20px auto;
   background:#111;
   color:#0f0;
@@ -22,6 +22,7 @@ textarea{
   border-radius:10px;
   font-family:monospace;
   font-size:14px;
+  resize:vertical;
 }
 button{
   padding:10px 20px;
@@ -39,11 +40,27 @@ button:hover{
 }
 #preview{
   width:90%;
-  height:400px;
+  height:300px;
   border:2px solid #f00;
   border-radius:10px;
   margin:auto;
   display:block;
+}
+#adaptedCode{
+  width:90%;
+  height:200px;
+  background:#111;
+  color:#0f0;
+  border:none;
+  padding:10px;
+  border-radius:10px;
+  font-family:monospace;
+  font-size:14px;
+  margin:20px auto;
+  resize:vertical;
+}
+h2{
+  margin-top:30px;
 }
 </style>
 </head>
@@ -52,29 +69,27 @@ button:hover{
 <h1>Adapter un jeu - Neon Studio</h1>
 
 <p>Colle ton code de jeu ici :</p>
-<textarea id="gameCode"><!DOCTYPE html>
-<html>
-<head><title>Mon jeu RTX</title></head>
-<body>
-<h1 style="color:#f00;text-align:center">Hello Neon Studio RTX!</h1>
-</body>
-</html>
-</textarea>
+<textarea id="gameCode"></textarea>
 
 <br>
 <button id="previewBtn">Prévisualiser</button>
-<button id="convertBtn">Convertir pour le site</button>
+<button id="convertBtn">Adapter pour le site</button>
 
+<h2>Prévisualisation</h2>
 <iframe id="preview"></iframe>
+
+<h2>Code adapté</h2>
+<textarea id="adaptedCode" readonly></textarea>
 
 <script>
 const preview = document.getElementById('preview');
 const textarea = document.getElementById('gameCode');
+const adaptedArea = document.getElementById('adaptedCode');
 
 // Prévisualisation dans l'iframe
 document.getElementById('previewBtn').addEventListener('click',()=>{
   const code = textarea.value;
-  // On enveloppe dans une structure HTML minimale
+  // On enveloppe dans une structure minimale
   const adapted = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -88,9 +103,15 @@ ${code}
   preview.srcdoc = adapted;
 });
 
-// Convertir et télécharger en .rtx.html compatible
+// Convertir pour le site et afficher dans la zone plus bas
 document.getElementById('convertBtn').addEventListener('click',()=>{
   const code = textarea.value;
+  // Vérification simple : le code doit contenir au moins un body
+  if(!code.includes("<body") && !code.includes("<canvas") && !code.includes("<script")){
+    alert("Attention : votre code semble incompatible avec le site.");
+    adaptedArea.value = "";
+    return;
+  }
   const adapted = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -101,16 +122,8 @@ document.getElementById('convertBtn').addEventListener('click',()=>{
 ${code}
 </body>
 </html>`;
-  const blob = new Blob([adapted], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  let fileName = prompt("Nom du jeu (sans extension):","MonJeu");
-  if(fileName){
-    if(!fileName.endsWith('.rtx')) fileName += '.rtx';
-    a.download = fileName+'.html';
-    a.click();
-    alert("Votre jeu est maintenant compatible et peut être placé à côté de index.html !");
-  }
+  adaptedArea.value = adapted;
+  alert("Le code est maintenant adapté pour votre site. Vous pouvez le copier et créer un fichier .rtx.html.");
 });
 </script>
 
