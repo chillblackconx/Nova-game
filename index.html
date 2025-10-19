@@ -3,105 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nova Game</title>
-<link rel="icon" href="favicon.ico">
+<title>Nova Game RTX</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text x='2' y='28' font-size='22' fill='red' font-family='Orbitron'>RTX</text></svg>">
 <style>
-html,body {
-  margin:0;
-  padding:0;
-  background:radial-gradient(circle at 30% 30%, #0a0a0a, #000);
-  color:white;
-  font-family: 'Segoe UI', sans-serif;
-  overflow-x:hidden;
-  height:100%;
-}
-@keyframes pulse {
-  0%,100% { text-shadow:0 0 10px #f00,0 0 20px #f00; }
-  50% { text-shadow:0 0 25px #ff2222,0 0 40px #f00; }
-}
-#splash {
-  position:fixed; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  background:#000;
-  z-index:999;
-  font-size:3em;
-  letter-spacing:3px;
-  animation:pulse 1.2s infinite;
-  color:#ff1a1a;
-  transition:opacity 1s ease;
-}
-#container {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-  padding:80px 30px;
-  opacity:0;
-  transform:translateY(30px);
-  transition:opacity 1s ease,transform 1s ease;
-}
-.box {
-  background:#111;
-  border:1px solid #ff1a1a44;
-  border-radius:16px;
-  padding:20px;
-  text-align:center;
-  cursor:pointer;
-  box-shadow:0 0 10px #f00a;
-  transition:transform 0.3s, box-shadow 0.3s, border 0.3s;
-}
-.box:hover {
-  transform:translateY(-6px) scale(1.03);
-  box-shadow:0 0 25px #ff2a2a;
-  border-color:#ff2a2a;
-}
-#msg {
-  text-align:center;
-  font-size:1.2em;
-  color:#ff5555;
-  text-shadow:0 0 10px #f00;
-}
+html,body{margin:0;padding:0;height:100%;background:#000;color:white;font-family:'Orbitron',sans-serif;overflow-x:hidden;}
+h1{text-align:center;margin-top:40px;font-size:2.5em;color:red;text-shadow:0 0 20px red;}
+#splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:black;color:red;font-size:3em;text-shadow:0 0 30px red;animation:fadeOut 3s forwards;z-index:999;}
+@keyframes fadeOut{0%,80%{opacity:1;}100%{opacity:0;display:none;}}
+#container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:80px 30px;opacity:0;transform:translateY(30px);transition:opacity 1s,transform 1s;}
+.box{background:#111;border:1px solid #ff1a1a44;border-radius:16px;padding:20px;text-align:center;cursor:pointer;box-shadow:0 0 10px #f00a;transition:transform 0.3s,box-shadow 0.3s,border 0.3s;}
+.box:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 0 25px #ff2a2a;border-color:#ff2a2a;}
+#msg{text-align:center;font-size:1.2em;color:#ff5555;text-shadow:0 0 10px #f00;}
+.cursor{position:fixed;top:0;left:0;width:20px;height:20px;border-radius:50%;background:red;box-shadow:0 0 20px red,0 0 40px red;pointer-events:none;transform:translate(-50%,-50%);transition:transform 0.05s;z-index:10000;}
+.btn-adapter{display:block;margin:20px auto;background:red;color:white;border:none;font-family:'Orbitron';padding:10px 20px;font-size:1.1em;border-radius:8px;cursor:pointer;box-shadow:0 0 20px red;transition:0.2s;}
+.btn-adapter:hover{box-shadow:0 0 40px red;transform:scale(1.05);}
 </style>
 </head>
 <body>
 <div id="splash">NEON STUDIO</div>
+<h1>Nova Game RTX</h1>
+<button class="btn-adapter" onclick="window.location.href='adapt.html'">Adapter un jeu</button>
 <div id="container"></div>
 <div id="msg"></div>
-
+<div class="cursor" id="cursor"></div>
 <script>
-window.addEventListener('load', ()=>{
-  const splash=document.getElementById('splash');
+// Curseur néon
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;});
+
+// Liste des jeux disponibles
+const jeux=[
+  "eggbattle.rtx.html",
+  "space-shottors.rtx.html"
+];
+
+window.addEventListener('load',()=>{
   setTimeout(()=>{
-    splash.style.opacity='0';
-    setTimeout(()=>splash.remove(),800);
-    showGames();
+    document.getElementById('splash').style.opacity='0';
+    setTimeout(()=>document.getElementById('splash').remove(),800);
+    afficherJeux();
   },2500);
 });
 
-async function showGames(){
+function afficherJeux(){
   const cont=document.getElementById('container');
   const msg=document.getElementById('msg');
-  try{
-    const resp=await fetch('.');
-    const html=await resp.text();
-    const matches=[...html.matchAll(/href="([^"]+\.rtx\.html)"/g)];
-    const files=[...new Set(matches.map(m=>m[1]))];
-    if(files.length===0){
-      msg.innerHTML="D’autres jeux vont venir — <b>Neon Studio</b>";
-    } else {
-      files.forEach(f=>{
-        const name=f.replace('.rtx.html','').toUpperCase();
-        const box=document.createElement('div');
-        box.className='box';
-        box.innerHTML=`<h2>${name}</h2><p>Jouer</p>`;
-        box.onclick=()=>location.href=f;
-        cont.appendChild(box);
-      });
-      cont.style.opacity='1';
-      cont.style.transform='translateY(0)';
-    }
-  }catch(e){
-    msg.textContent="Impossible de charger les jeux 😢";
+  if(jeux.length===0){
+    msg.innerHTML="D’autres jeux vont venir — <b>Neon Studio</b>";
+    return;
   }
+  jeux.forEach(f=>{
+    const box=document.createElement('div');
+    box.className='box';
+    box.innerHTML=`<h2>${f.replace('.rtx.html','').replace(/[-_]/g,' ')}</h2><p>Jouer</p>`;
+    box.onclick=()=>window.open(f,'_blank');
+    cont.appendChild(box);
+  });
+  cont.style.opacity='1';
+  cont.style.transform='translateY(0)';
 }
 </script>
 </body>
