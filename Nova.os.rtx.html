@@ -17,6 +17,8 @@ body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
 .pro{animation:proGradient 2s linear infinite;}
 #nova-game-window{border:none;}
 #nova-game-iframe{width:100%;height:100%;border:none;}
+#taskbar{position:absolute;bottom:0;left:0;width:100%;height:40px;background:#111;display:flex;align-items:center;padding:0 10px;border-top:2px solid #0ff;}
+.task-icon{width:30px;height:30px;margin-right:5px;background:#222;border-radius:5px;display:flex;justify-content:center;align-items:center;color:#0ff;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -27,6 +29,9 @@ body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
   <div class="icon" onclick="openNovaWindow('nova-files')">Fichiers</div>
   <div class="icon" onclick="openNovaWindow('nova-terminal')">Terminal</div>
 </div>
+
+<!-- Barre des tâches -->
+<div id="taskbar"></div>
 
 <!-- Fenêtres -->
 <div class="nova-window" id="nova-shop">
@@ -103,20 +108,30 @@ function buyNovaItem(i){
   renderNovaShop();
 }
 
+// === Restock automatique toutes les 5 minutes ===
+function restockNovaShop(){
+  novaShopItems.forEach(item=>{
+    if(item.rarity==='Pro'){
+      item.stock = Math.random() < 0.05 ? 1 : 0; // 5% chance
+    } else if(item.rarity==='Platinium'){
+      item.stock = Math.random() < 0.02 ? 1 : 0; // 2% chance
+    } else {
+      item.stock = Math.max(item.stock, Math.floor(Math.random()*5+1));
+    }
+  });
+  renderNovaShop();
+  console.log('Shop restocké !');
+}
+setInterval(restockNovaShop, 300000);
+
 // === Fenêtres ===
 function openNovaWindow(id){ 
   const w=document.getElementById(id); 
   w.style.display='flex'; 
   makeNovaDraggable(w);
-  // si fenêtre de jeu, full screen
-  if(id==='nova-game-window'){
-    w.style.top='0px'; w.style.left='0px'; 
-    w.style.width='100vw'; w.style.height='100vh';
-  }
+  if(id==='nova-game-window'){w.style.top='0px'; w.style.left='0px'; w.style.width='100vw'; w.style.height='100vh';}
 }
-function closeNovaWindow(id){ 
-  document.getElementById(id).style.display='none';
-}
+function closeNovaWindow(id){ document.getElementById(id).style.display='none';}
 
 // Drag & Drop pour toutes les fenêtres
 function makeNovaDraggable(el){
@@ -134,13 +149,19 @@ function launchGame(file){
   openNovaWindow('nova-game-window');
 }
 
+// === Barre des tâches ===
+const taskbar=document.getElementById('taskbar');
+function addTaskIcon(name){
+  const icon=document.createElement('div');
+  icon.className='task-icon';
+  icon.innerText=name[0];
+  taskbar.appendChild(icon);
+}
+addTaskIcon('Nova OS'); // exemple initial
+
 // === Initialisation ===
 renderNovaShop();
-
-// Optionnel : ajouter des raccourcis clavier
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') closeNovaWindow('nova-game-window');
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeNovaWindow('nova-game-window');});
 </script>
 </body>
 </html>
