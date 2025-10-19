@@ -4,73 +4,73 @@
 <meta charset="UTF-8">
 <title>Adapter un jeu - Neon Studio</title>
 <style>
-body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:#0a0a0f;
-  color:#fff;
-  text-align:center;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0a0a0f;
+  color: #fff;
+  text-align: center;
 }
-textarea{
-  width:90%;
-  height:200px;
-  margin:20px auto;
-  background:#111;
-  color:#0f0;
-  border:none;
-  padding:10px;
-  border-radius:10px;
-  font-family:monospace;
-  font-size:14px;
-  resize:vertical;
+textarea {
+  width: 90%;
+  height: 200px;
+  margin: 20px auto;
+  background: #111;
+  color: #0f0;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
 }
-button{
-  padding:10px 20px;
-  background:#f00;
-  border:none;
-  color:#fff;
-  font-weight:bold;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:20px;
-  transition:0.3s;
+button {
+  padding: 10px 20px;
+  background: #f00;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.3s;
 }
-button:hover{
-  background:#ff5555;
+button:hover {
+  background: #ff5555;
 }
-#preview{
-  width:90%;
-  height:300px;
-  border:2px solid #f00;
-  border-radius:10px;
-  margin:auto;
-  display:block;
+#preview {
+  width: 90%;
+  height: 400px;
+  border: 2px solid #f00;
+  border-radius: 10px;
+  margin: auto;
+  display: block;
+  background: #000;
 }
-#adaptedCode{
-  width:90%;
-  height:200px;
-  background:#111;
-  color:#0f0;
-  border:none;
-  padding:10px;
-  border-radius:10px;
-  font-family:monospace;
-  font-size:14px;
-  margin:20px auto;
-  resize:vertical;
+#adaptedCode {
+  width: 90%;
+  height: 200px;
+  background: #111;
+  color: #0f0;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  margin: 20px auto;
+  resize: vertical;
 }
-h2{
-  margin-top:30px;
+h2 {
+  margin-top: 30px;
 }
 </style>
 </head>
 <body>
 
 <h1>Adapter un jeu - Neon Studio</h1>
-
 <p>Colle ton code de jeu ici :</p>
-<textarea id="gameCode"></textarea>
 
+<textarea id="gameCode"><!-- colle ton code ici --></textarea>
 <br>
 <button id="previewBtn">Prévisualiser</button>
 <button id="convertBtn">Adapter pour le site</button>
@@ -86,32 +86,41 @@ const preview = document.getElementById('preview');
 const textarea = document.getElementById('gameCode');
 const adaptedArea = document.getElementById('adaptedCode');
 
-// Prévisualisation dans l'iframe
-document.getElementById('previewBtn').addEventListener('click',()=>{
-  const code = textarea.value;
-  // On enveloppe dans une structure minimale
-  const adapted = `<!DOCTYPE html>
+document.getElementById('previewBtn').addEventListener('click', () => {
+  const code = textarea.value.trim();
+  if (!code) {
+    alert("Ajoute ton code avant de prévisualiser !");
+    return;
+  }
+
+  // S’il contient un <html> complet, on le charge directement
+  if (code.includes("<html")) {
+    preview.srcdoc = code;
+  } else {
+    // Sinon on l’enveloppe pour qu’il soit affichable
+    preview.srcdoc = `<!DOCTYPE html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Mon Jeu RTX</title>
-</head>
-<body>
+<head><meta charset="UTF-8"><title>Prévisualisation Jeu</title></head>
+<body style="background:black;color:white;text-align:center;">
 ${code}
-</body>
-</html>`;
-  preview.srcdoc = adapted;
+</body></html>`;
+  }
 });
 
-// Convertir pour le site et afficher dans la zone plus bas
-document.getElementById('convertBtn').addEventListener('click',()=>{
-  const code = textarea.value;
-  // Vérification simple : le code doit contenir au moins un body
-  if(!code.includes("<body") && !code.includes("<canvas") && !code.includes("<script")){
-    alert("Attention : votre code semble incompatible avec le site.");
+document.getElementById('convertBtn').addEventListener('click', () => {
+  const code = textarea.value.trim();
+  if (!code) {
+    alert("Colle ton code avant d'adapter !");
+    return;
+  }
+
+  // Vérification basique : il faut au moins un body ou un script
+  if (!code.includes("<body") && !code.includes("<script") && !code.includes("<canvas")) {
+    alert("⚠️ Le code semble incompatible avec Nova Game (il manque un <body> ou du contenu).");
     adaptedArea.value = "";
     return;
   }
+
   const adapted = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -122,8 +131,9 @@ document.getElementById('convertBtn').addEventListener('click',()=>{
 ${code}
 </body>
 </html>`;
+
   adaptedArea.value = adapted;
-  alert("Le code est maintenant adapté pour votre site. Vous pouvez le copier et créer un fichier .rtx.html.");
+  alert("✅ Ton jeu a été adapté pour Nova Game ! Copie le code et sauvegarde-le en .rtx.html.");
 });
 </script>
 
