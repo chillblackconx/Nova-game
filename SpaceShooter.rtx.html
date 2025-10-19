@@ -2,66 +2,78 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Space Shooter RTX</title>
+<title>Space Shottors</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{margin:0;background:#000;overflow:hidden;}
-canvas{display:block;margin:0 auto;background:#111;}
+html,body{margin:0;padding:0;height:100%;background:#000;color:white;overflow:hidden;font-family:'Orbitron',sans-serif;}
+#score{position:absolute;top:10px;left:10px;font-size:20px;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
-<canvas id="game" width="400" height="400"></canvas>
+<div id="score">Score: 0</div>
 <script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+let player, cursors, bullets, enemies, score=0, lastFired=0;
 
-let player = {x:200, y:350, w:30, h:20};
-let keys = {};
-let bullets = [];
-let enemies = [];
-let score = 0;
-let gameOver = false;
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: { default: 'arcade', arcade: { debug: false } },
+    scene: { preload, create, update }
+};
 
-document.addEventListener('keydown', e => keys[e.key] = true);
-document.addEventListener('keyup', e => keys[e.key] = false);
+const game = new Phaser.Game(config);
 
-function spawnEnemy(){
-  const x = Math.random() * (canvas.width - 20);
-  enemies.push({x:x, y:0, w:20, h:20});
+function preload(){
+    this.load.image('player','https://i.imgur.com/6QxNQkK.png'); // simple player
+    this.load.image('bullet','https://i.imgur.com/Q8t8XnL.png');
+    this.load.image('enemy','https://i.imgur.com/Fb6Xhcd.png');
+}
+
+function create(){
+    player = this.physics.add.sprite(400,550,'player').setCollideWorldBounds(true);
+    bullets = this.physics.add.group();
+    enemies = this.physics.add.group();
+
+    cursors = this.input.keyboard.createCursorKeys();
+    this.input.keyboard.on('keydown-SPACE', ()=>shoot(this));
+
+    this.time.addEvent({delay:1500, callback:spawnEnemy, callbackScope:this, loop:true});
+    this.physics.add.overlap(bullets,enemies,onBulletHit,null,this);
 }
 
 function update(){
-  if(gameOver) return;
+    let vx=0;
+    if(cursors.left.isDown) vx=-300;
+    if(cursors.right.isDown) vx=300;
+    player.setVelocityX(vx);
 
-  // Déplacement joueur
-  if(keys['ArrowLeft'] && player.x>0) player.x -=5;
-  if(keys['ArrowRight'] && player.x+player.w<canvas.width) player.x +=5;
-  if(keys[' ']) bullets.push({x:player.x+player.w/2-2, y:player.y-10, w:4, h:10});
-
-  // Mise à jour balles
-  bullets.forEach((b,i)=>{
-    b.y -=7;
-    enemies.forEach((e,j)=>{
-      if(b.x < e.x+e.w && b.x+b.w > e.x &&
-         b.y < e.y+e.h && b.y+b.h > e.y){
-        bullets.splice(i,1);
-        enemies.splice(j,1);
-        score += 10;
-      }
+    bullets.children.iterate(b=>{
+        if(b && b.y<0) b.destroy();
     });
-  });
-
-  // Mise à jour ennemis
-  enemies.forEach(e=>{
-    e.y += 3;
-    if(e.y + e.h >= canvas.height) gameOver = true;
-    if(e.y + e.h >= player.y && e.x < player.x+player.w && e.x+e.w > player.x){
-      gameOver = true;
-    }
-  });
-
-  // Spawn aléatoire des ennemis
-  if(Math.random() < 0.02) spawnEnemy();
 }
 
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function shoot(scene){
+    const now = scene.time.now;
+    if(now - lastFired < 300) return;
+    lastFired = now;
+    const bullet = bullets.create(player.x, player.y-20,'bullet');
+    bullet.setVelocityY(-500);
+}
+
+function spawnEnemy(){
+    const x = Phaser.Math.Between(50,750);
+    const e = enemies.create(x,0,'enemy');
+    e.setVelocityY(Phaser.Math.Between(50,150));
+}
+
+function onBulletHit(bullet,enemy){
+    bullet.destroy();
+    enemy.destroy();
+    score+=10;
+    document.getElementById('score').innerText='Score: '+score;
+}
+</script>
+</body>
+</html>
