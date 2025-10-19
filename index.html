@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Nova Game RTX</title>
+<link rel="icon" type="image/png" href="favicon.png" />
 <style>
 body{
   margin:0;
@@ -11,22 +12,31 @@ body{
   background:#0a0a0f;
   color:#fff;
   text-align:center;
-  cursor:none; /* cache le curseur par défaut */
+  cursor:none;
+  overflow-x:hidden;
 }
-h1{
-  margin:0;
-  padding:20px;
-  font-size:2.2em;
-  background:linear-gradient(90deg,#0ff,#08f);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  text-shadow:1px 1px #000;
+#logo{
+  font-size:3em;
+  font-weight:bold;
+  color:#0ff;
+  text-shadow:0 0 10px #0ff,0 0 20px #0ff,0 0 30px #08f;
+  margin:50px 0 30px 0;
+  opacity:0;
+  animation:fadeIn 2s forwards;
+}
+@keyframes fadeIn{
+  to{opacity:1;}
 }
 #gameGrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:20px;
   padding:30px;
+  opacity:0;
+  animation:fadeInGrid 1s forwards 2s;
+}
+@keyframes fadeInGrid{
+  to{opacity:1;}
 }
 .gameBox{
   background:#111;
@@ -65,7 +75,6 @@ iframe{
   border-radius:12px;
   display:none;
 }
-/* Curseur néon */
 #neonCursor{
   position:fixed;
   top:0;
@@ -75,7 +84,7 @@ iframe{
   border-radius:50%;
   pointer-events:none;
   background:transparent;
-  box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #08f, 0 0 50px #08f;
+  box-shadow:0 0 10px #0ff,0 0 20px #0ff,0 0 30px #0ff,0 0 40px #08f,0 0 50px #08f;
   transition: transform 0.05s ease-out;
   z-index:1000;
 }
@@ -83,7 +92,7 @@ iframe{
 </head>
 <body>
 
-<h1>Nova Game RTX</h1>
+<div id="logo">Neon Studio</div>
 <div id="gameGrid"></div>
 <iframe id="gameFrame"></iframe>
 <div id="neonCursor"></div>
@@ -95,52 +104,51 @@ document.addEventListener('mousemove',e=>{
   neon.style.transform=`translate(${e.clientX-10}px, ${e.clientY-10}px)`;
 });
 
-// Liste des fichiers (seuls ceux avec .rtx sont des jeux)
+// Liste des fichiers .rtx valides
 const allFiles=[
-  "SpaceShooter.rtx",
-  "Puzzle.rtx",
-  "Adventure.rtx",
-  "Draft.txt",
-  "TestGame.html"
+  "Avoider.rtx.html",
+  "SpaceShooter.rtx.html",
+  "Puzzle.rtx.html"
 ];
 
 const grid=document.getElementById('gameGrid');
 const frame=document.getElementById('gameFrame');
 
-// Fonction pour créer un mini aperçu animé
 function createPreview(box,file){
   const canvas=document.createElement('canvas');
   canvas.width=200; canvas.height=120;
   const ctx=canvas.getContext('2d');
   box.appendChild(canvas);
 
-  // Exemple simple d'aperçu : texte animé
   let angle=0;
   function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle='#0ff';
     ctx.font='20px Arial';
-    ctx.fillText(file.replace('.rtx',''),canvas.width/2-50+Math.sin(angle)*10,canvas.height/2+Math.cos(angle)*10);
+    ctx.fillText(file.replace('.rtx.html',''),canvas.width/2-50+Math.sin(angle)*10,canvas.height/2+Math.cos(angle)*10);
     angle+=0.05;
     requestAnimationFrame(animate);
   }
   animate();
 }
 
-allFiles.forEach(file=>{
-  if(file.includes('.rtx')){
-    const box=document.createElement('div');
-    box.className='gameBox';
-    box.textContent=file.replace('.rtx',''); // nom du jeu
-    createPreview(box,file); // mini-aperçu animé
-    box.onclick=()=>{
-      frame.src='games/'+file; // charge le jeu
-      frame.style.display='block';
-      frame.scrollIntoView({behavior:'smooth'});
-    };
-    grid.appendChild(box);
-  }
-});
+// Crée les boxes seulement si il y a des fichiers valides
+if(allFiles.length>0){
+  allFiles.forEach(file=>{
+    if(file.includes('.rtx')){
+      const box=document.createElement('div');
+      box.className='gameBox';
+      box.textContent=file.replace('.rtx.html','');
+      createPreview(box,file);
+      box.onclick=()=>{
+        frame.src='games/'+file;
+        frame.style.display='block';
+        frame.scrollIntoView({behavior:'smooth'});
+      };
+      grid.appendChild(box);
+    }
+  });
+}
 </script>
 </body>
 </html>
