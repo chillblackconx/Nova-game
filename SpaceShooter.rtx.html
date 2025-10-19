@@ -2,18 +2,19 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Space Shooters</title>
+<title>Space Shooters Neon</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html,body{margin:0;padding:0;height:100%;background:#000;overflow:hidden;font-family:'Orbitron',sans-serif;}
-#score{position:absolute;top:10px;left:10px;font-size:20px;color:red;text-shadow:0 0 10px red;}
+#score{position:absolute;top:10px;left:10px;font-size:22px;color:#0ff;text-shadow:0 0 15px #0ff,0 0 25px #0ff;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
 <div id="score">Score: 0</div>
 <script>
-let player, cursors, bullets, enemies, score=0, lastFired=0;
+let player, cursors, bullets, enemies, stars, score=0, lastFired=0;
+let spaceKey;
 
 const config = {
     type: Phaser.AUTO,
@@ -26,30 +27,55 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload(){
-    // On crée les textures directement
-    this.add.graphics().fillStyle(0xff0000,1).fillTriangle(0,20, 20,20, 10,0).generateTexture('player',20,20);
-    this.add.graphics().fillStyle(0xffff00,1).fillRect(0,0,6,12).generateTexture('bullet',6,12);
-    this.add.graphics().fillStyle(0x00ffff,1).fillCircle(16,16,16).generateTexture('enemy',32,32);
+    const g = this.add.graphics();
+
+    // Vaisseau néon rouge
+    g.fillStyle(0xff0000,1).fillTriangle(0,20,20,20,10,0).generateTexture('player',20,20);
+
+    // Bullet néon jaune
+    g.clear(); g.fillStyle(0xffff00,1).fillRect(0,0,6,12).generateTexture('bullet',6,12);
+
+    // Ennemi néon cyan
+    g.clear(); g.fillStyle(0x00ffff,1).fillCircle(16,16,16).generateTexture('enemy',32,32);
+
+    // Etoiles
+    stars = [];
+    for(let i=0;i<100;i++){ stars.push({x:Math.random()*800,y:Math.random()*600,size:Math.random()*2+1,speed:Math.random()*1.5+0.5});}
 }
 
 function create(){
     player = this.physics.add.sprite(400,550,'player').setCollideWorldBounds(true);
-    bullets = this.physics.add.group();
+    bullets = this.physics.add.group({classType: Phaser.Physics.Arcade.Image, runChildUpdate:true});
     enemies = this.physics.add.group();
-
     cursors = this.input.keyboard.createCursorKeys();
-    this.input.keyboard.on('keydown-SPACE', ()=>shoot(this));
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-    this.time.addEvent({delay:1500, callback:spawnEnemy, callbackScope:this, loop:true});
+    this.time.addEvent({delay:1200, callback:spawnEnemy, callbackScope:this, loop:true});
     this.physics.add.overlap(bullets,enemies,onBulletHit,null,this);
 }
 
-function update(){
+function update(time,delta){
+    // Fond étoilé animé
+    const ctx = game.canvas.getContext('2d');
+    ctx.fillStyle='black';
+    ctx.fillRect(0,0,800,600);
+    ctx.fillStyle='#0ff';
+    stars.forEach(s=>{
+        ctx.fillRect(s.x,s.y,s.size,s.size);
+        s.y += s.speed;
+        if(s.y>600) s.y=0;
+    });
+
+    // Déplacement joueur
     let vx=0;
     if(cursors.left.isDown) vx=-300;
     if(cursors.right.isDown) vx=300;
     player.setVelocityX(vx);
 
+    // Tir
+    if(spaceKey.isDown) shoot(this);
+
+    // Nettoyage bullets
     bullets.children.iterate(b=>{
         if(b && b.y<0) b.destroy();
     });
@@ -57,16 +83,18 @@ function update(){
 
 function shoot(scene){
     const now = scene.time.now;
-    if(now - lastFired < 300) return;
+    if(now - lastFired < 200) return;
     lastFired = now;
     const bullet = bullets.create(player.x, player.y-20,'bullet');
     bullet.setVelocityY(-500);
+    bullet.setBlendMode(Phaser.BlendModes.ADD);
 }
 
 function spawnEnemy(){
     const x = Phaser.Math.Between(50,750);
     const e = enemies.create(x,0,'enemy');
     e.setVelocityY(Phaser.Math.Between(50,150));
+    e.setBlendMode(Phaser.BlendModes.ADD);
 }
 
 function onBulletHit(bullet,enemy){
