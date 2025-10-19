@@ -13,13 +13,12 @@ body{
   color:#fff;
   text-align:center;
   cursor:none;
-  overflow-x:hidden;
 }
 #logo{
   font-size:3em;
   font-weight:bold;
-  color:#0ff;
-  text-shadow:0 0 10px #0ff,0 0 20px #0ff,0 0 30px #08f;
+  color:#f00; /* rouge néon */
+  text-shadow:0 0 10px #f00,0 0 20px #f00,0 0 30px #800,0 0 40px #800;
   margin:50px 0 30px 0;
   opacity:0;
   animation:fadeIn 2s forwards;
@@ -40,7 +39,7 @@ body{
 }
 .gameBox{
   background:#111;
-  border:1px solid #0ff;
+  border:1px solid #f00;
   border-radius:15px;
   padding:20px;
   cursor:pointer;
@@ -55,7 +54,7 @@ body{
 }
 .gameBox:hover{
   transform:scale(1.05);
-  box-shadow:0 0 20px #0ff;
+  box-shadow:0 0 20px #f00;
 }
 .gameBox canvas{
   position:absolute;
@@ -84,9 +83,10 @@ iframe{
   border-radius:50%;
   pointer-events:none;
   background:transparent;
-  box-shadow:0 0 10px #0ff,0 0 20px #0ff,0 0 30px #0ff,0 0 40px #08f,0 0 50px #08f;
-  transition: transform 0.05s ease-out;
+  box-shadow:0 0 10px #f00,0 0 20px #f00,0 0 30px #f00,0 0 40px #800,0 0 50px #800;
+  transition: transform 0.05s ease-out, opacity 0.5s;
   z-index:1000;
+  opacity:1;
 }
 </style>
 </head>
@@ -98,13 +98,17 @@ iframe{
 <div id="neonCursor"></div>
 
 <script>
-// Curseur néon
+// Curseur néon rouge qui disparaît après 3s d'inactivité
 const neon=document.getElementById('neonCursor');
+let timeout;
 document.addEventListener('mousemove',e=>{
   neon.style.transform=`translate(${e.clientX-10}px, ${e.clientY-10}px)`;
+  neon.style.opacity='1';
+  clearTimeout(timeout);
+  timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000); // disparaît après 3s
 });
 
-// Liste des fichiers .rtx valides
+// Liste des fichiers jeux .rtx.html valides
 const allFiles=[
   "Avoider.rtx.html",
   "SpaceShooter.rtx.html",
@@ -114,6 +118,7 @@ const allFiles=[
 const grid=document.getElementById('gameGrid');
 const frame=document.getElementById('gameFrame');
 
+// Crée un mini aperçu animé pour chaque box
 function createPreview(box,file){
   const canvas=document.createElement('canvas');
   canvas.width=200; canvas.height=120;
@@ -123,7 +128,7 @@ function createPreview(box,file){
   let angle=0;
   function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#0ff';
+    ctx.fillStyle='#f00';
     ctx.font='20px Arial';
     ctx.fillText(file.replace('.rtx.html',''),canvas.width/2-50+Math.sin(angle)*10,canvas.height/2+Math.cos(angle)*10);
     angle+=0.05;
@@ -132,7 +137,7 @@ function createPreview(box,file){
   animate();
 }
 
-// Crée les boxes seulement si il y a des fichiers valides
+// Crée les boxes
 if(allFiles.length>0){
   allFiles.forEach(file=>{
     if(file.includes('.rtx')){
@@ -141,7 +146,7 @@ if(allFiles.length>0){
       box.textContent=file.replace('.rtx.html','');
       createPreview(box,file);
       box.onclick=()=>{
-        frame.src='games/'+file;
+        frame.src='games/'+file; // ouvre le jeu dans l'iframe
         frame.style.display='block';
         frame.scrollIntoView({behavior:'smooth'});
       };
