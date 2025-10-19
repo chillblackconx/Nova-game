@@ -15,9 +15,9 @@ body{
   cursor:none;
 }
 #logo{
-  font-size:3em;
+  font-size:2.5em;
   font-weight:bold;
-  color:#f00;
+  color:#f00; /* néon rouge */
   text-shadow:0 0 10px #f00,0 0 20px #f00,0 0 30px #800,0 0 40px #800;
   margin:50px 0 30px 0;
   opacity:0;
@@ -66,14 +66,6 @@ body{
   border-radius:15px;
   opacity:0.2;
 }
-iframe{
-  border:none;
-  width:90%;
-  height:500px;
-  margin:30px auto;
-  border-radius:12px;
-  display:none;
-}
 #neonCursor{
   position:fixed;
   top:0;
@@ -88,13 +80,23 @@ iframe{
   z-index:1000;
   opacity:1;
 }
+.message{
+  margin-top:30px;
+  font-size:1.5em;
+  color:#0ff;
+  text-shadow:0 0 10px #0ff;
+}
 </style>
 </head>
 <body>
 
+<!-- Logo Neon Studio -->
 <div id="logo">Neon Studio</div>
+
+<!-- Grille de jeux -->
 <div id="gameGrid"></div>
-<iframe id="gameFrame"></iframe>
+
+<!-- Curseur néon rouge -->
 <div id="neonCursor"></div>
 
 <script>
@@ -102,28 +104,25 @@ iframe{
 const neon=document.getElementById('neonCursor');
 let timeout;
 
-function showCursor(x,y){
-  neon.style.transform=`translate(${x-10}px, ${y-10}px)`;
+document.addEventListener('mousemove',e=>{
+  neon.style.transform=`translate(${e.clientX-10}px, ${e.clientY-10}px)`;
   neon.style.opacity='1';
   clearTimeout(timeout);
   timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000);
-}
-
-document.addEventListener('mousemove',e=>{
-  showCursor(e.clientX,e.clientY);
 });
 
-// Liste des fichiers réellement présents dans le même dossier
+// Liste des fichiers possibles (manuellement)
 const allFiles=[
   "Avoider.rtx.html",
   "SpaceShooter.rtx.html",
-  "Puzzle.rtx.html"
+  "Puzzle.rtx.html",
+  "Runner.rtx.html",
+  "Maze.rtx.html"
 ];
 
 const grid=document.getElementById('gameGrid');
-const frame=document.getElementById('gameFrame');
+let boxCount=0; // nombre de jeux existants
 
-// Crée un mini aperçu animé pour chaque box
 function createPreview(box,file){
   const canvas=document.createElement('canvas');
   canvas.width=150; canvas.height=100;
@@ -142,33 +141,46 @@ function createPreview(box,file){
   animate();
 }
 
-// Crée les boxes uniquement si le fichier contient ".rtx"
+// Vérifie si le fichier existe avant de créer la box
 allFiles.forEach(file=>{
   if(file.includes('.rtx')){
-    const box=document.createElement('div');
-    box.className='gameBox';
-    box.textContent=file.replace('.rtx.html','');
-    createPreview(box,file);
+    fetch(file,{method:'HEAD'}).then(res=>{
+      if(res.ok){
+        boxCount++;
+        const box=document.createElement('div');
+        box.className='gameBox';
+        box.textContent=file.replace('.rtx.html','');
+        createPreview(box,file);
 
-    // Pulse curseur sur hover
-    box.addEventListener('mouseenter',()=>{
-      neon.style.transition='transform 0.05s ease-out, opacity 0.2s';
-      neon.style.transform+=' scale(2)';
-      neon.style.boxShadow='0 0 20px #f00,0 0 40px #f00,0 0 60px #f00,0 0 80px #800,0 0 100px #800';
-    });
-    box.addEventListener('mouseleave',()=>{
-      neon.style.transform=neon.style.transform.replace(' scale(2)','');
-      neon.style.boxShadow='0 0 10px #f00,0 0 20px #f00,0 0 30px #f00,0 0 40px #800,0 0 50px #800';
-    });
+        // Pulse curseur sur hover
+        box.addEventListener('mouseenter',()=>{
+          neon.style.transition='transform 0.05s ease-out, opacity 0.2s';
+          neon.style.transform+=' scale(2)';
+          neon.style.boxShadow='0 0 20px #f00,0 0 40px #f00,0 0 60px #f00,0 0 80px #800,0 0 100px #800';
+        });
+        box.addEventListener('mouseleave',()=>{
+          neon.style.transform=neon.style.transform.replace(' scale(2)','');
+          neon.style.boxShadow='0 0 10px #f00,0 0 20px #f00,0 0 30px #f00,0 0 40px #800,0 0 50px #800';
+        });
 
-    // Clique → ouvre le jeu directement dans la même page
-    box.addEventListener('click',()=>{
-      window.location.href=file; // <-- ouvre le jeu directement
-    });
+        // Clique → ouvre le jeu directement
+        box.addEventListener('click',()=>{ window.location.href=file; });
 
-    grid.appendChild(box);
+        grid.appendChild(box);
+      }
+    });
   }
 });
+
+// Si aucun jeu n’existe, affiche un message
+setTimeout(()=>{
+  if(boxCount===0){
+    const msg=document.createElement('div');
+    msg.className='message';
+    msg.textContent="Désolé, d'autres jeux vont venir ! – Neon Studio";
+    grid.appendChild(msg);
+  }
+},500); // délai pour que fetch ait le temps de vérifier
 </script>
 </body>
 </html>
