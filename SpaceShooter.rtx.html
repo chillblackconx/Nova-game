@@ -13,7 +13,7 @@ html,body{margin:0;padding:0;height:100%;background:#000;overflow:hidden;font-fa
 <body>
 <div id="score">Score: 0</div>
 <script>
-let player, cursors, bullets, enemies, stars, score=0, lastFired=0;
+let player, cursors, bullets, enemies, stars=[], score=0, lastFired=0;
 let spaceKey;
 
 const config = {
@@ -30,20 +30,21 @@ function preload(){
     const g = this.add.graphics();
 
     // Vaisseau néon rouge
-    g.fillStyle(0xff0000,1).fillTriangle(0,20,20,20,10,0).generateTexture('player',20,20);
+    g.fillStyle(0xff0000,1).fillTriangle(0,20, 20,20, 10,0).generateTexture('player',20,20);
 
     // Bullet néon jaune
     g.clear(); g.fillStyle(0xffff00,1).fillRect(0,0,6,12).generateTexture('bullet',6,12);
 
     // Ennemi néon cyan
     g.clear(); g.fillStyle(0x00ffff,1).fillCircle(16,16,16).generateTexture('enemy',32,32);
-
-    // Etoiles
-    stars = [];
-    for(let i=0;i<100;i++){ stars.push({x:Math.random()*800,y:Math.random()*600,size:Math.random()*2+1,speed:Math.random()*1.5+0.5});}
 }
 
 function create(){
+    // Fond étoilé Phaser
+    for(let i=0;i<100;i++){
+        stars.push(this.add.rectangle(Math.random()*800,Math.random()*600,2,2,0x00ffff).setAlpha(Math.random()));
+    }
+
     player = this.physics.add.sprite(400,550,'player').setCollideWorldBounds(true);
     bullets = this.physics.add.group({classType: Phaser.Physics.Arcade.Image, runChildUpdate:true});
     enemies = this.physics.add.group();
@@ -55,14 +56,9 @@ function create(){
 }
 
 function update(time,delta){
-    // Fond étoilé animé
-    const ctx = game.canvas.getContext('2d');
-    ctx.fillStyle='black';
-    ctx.fillRect(0,0,800,600);
-    ctx.fillStyle='#0ff';
+    // Faire bouger les étoiles
     stars.forEach(s=>{
-        ctx.fillRect(s.x,s.y,s.size,s.size);
-        s.y += s.speed;
+        s.y += 1 + Math.random()*1;
         if(s.y>600) s.y=0;
     });
 
