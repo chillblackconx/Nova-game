@@ -1,1 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nova OS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;overflow:hidden;background:#000;font-family:'Orbitron',sans-serif;cursor:none;}
+#cursor{position:absolute;width:20px;height:20px;border-radius:50%;background:red;pointer-events:none;box-shadow:0 0 10px red;}
+#desktop{position:relative;width:100vw;height:100vh;overflow:hidden;}
+.icon{width:80px;height:80px;background:#111;color:#0ff;text-align:center;line-height:80px;margin:10px;display:inline-block;border:2px solid #0ff;border-radius:10px;cursor:pointer;user-select:none;transition:0.2s;}
+.icon:hover{box-shadow:0 0 15px #0ff;}
+.window{position:absolute;width:400px;height:300px;background:#111;border:2px solid #0ff;border-radius:5px;display:none;flex-direction:column;z-index:10;}
+.window-header{height:30px;background:#000;border-bottom:1px solid #0ff;padding:5px;cursor:move;}
+.window-content{flex:1;padding:10px;color:#0ff;overflow:auto;}
+#shop{position:absolute;top:50px;left:50%;transform:translateX(-50%);width:400px;height:300px;background:#111;border:2px solid #0ff;border-radius:5px;display:none;flex-direction:column;z-index:20;}
+#shop h2{color:#0ff;text-align:center;margin:10px;}
+.shop-item{background:#222;margin:5px;padding:5px;border:1px solid #0ff;border-radius:5px;cursor:pointer;transition:0.2s;}
+.shop-item:hover{box-shadow:0 0 10px #0ff;}
+</style>
+</head>
+<body>
+<div id="desktop"></div>
+<div id="cursor"></div>
 
+<!-- Fenêtre pour mini-jeu -->
+<div class="window" id="gameWindow">
+  <div class="window-header">Mini-jeu <span style="float:right;cursor:pointer;" onclick="closeWindow('gameWindow')">✖</span></div>
+  <div class="window-content" id="gameContent">Ici le jeu</div>
+</div>
+
+<!-- Neon Shop -->
+<div id="shop">
+  <h2>Neon Shop</h2>
+  <div class="shop-item" onclick="buyFeature('Gravité inversée')">Gravité inversée (Rare) - 500 crédits</div>
+  <div class="shop-item" onclick="buyFeature('Plateforme mobile')">Plateforme mobile (Épique) - 800 crédits</div>
+  <div class="shop-item" onclick="buyFeature('Power-up +')">Power-up + (Légendaire) - 1500 crédits</div>
+</div>
+
+<script>
+// Curseur néon
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{
+  cursor.style.left=e.clientX-10+'px';
+  cursor.style.top=e.clientY-10+'px';
+});
+
+// Bureau et icônes
+const desktop=document.getElementById('desktop');
+const apps=[
+  {name:'Egg Battle',id:'egg',game:'<p>Egg Battle à lancer ici</p>'},
+  {name:'Avoider',id:'avoider',game:'<p>Avoider à lancer ici</p>'}
+];
+apps.forEach(app=>{
+  const div=document.createElement('div');
+  div.className='icon';
+  div.innerText=app.name;
+  div.onclick=()=>openGame(app);
+  desktop.appendChild(div);
+});
+
+// Ouvrir mini-jeu
+function openGame(app){
+  const win=document.getElementById('gameWindow');
+  const content=document.getElementById('gameContent');
+  content.innerHTML=app.game;
+  win.style.display='flex';
+  win.style.left='50px';
+  win.style.top='50px';
+}
+
+// Fermer fenêtre
+function closeWindow(id){
+  document.getElementById(id).style.display='none';
+}
+
+// Drag fenêtre
+let dragObj=null, offsetX=0, offsetY=0;
+document.querySelectorAll('.window-header').forEach(header=>{
+  header.addEventListener('mousedown',e=>{
+    dragObj=header.parentElement;
+    offsetX=e.offsetX; offsetY=e.offsetY;
+  });
+});
+document.addEventListener('mousemove',e=>{
+  if(dragObj){
+    dragObj.style.left=e.clientX-offsetX+'px';
+    dragObj.style.top=e.clientY-offsetY+'px';
+  }
+});
+document.addEventListener('mouseup',()=>dragObj=null);
+
+// Shop
+function buyFeature(name){
+  alert('Vous avez acheté: '+name);
+  // Ici on pourrait ajouter la fonctionnalité au système
+}
+
+// Ouvrir shop avec touche S
+document.addEventListener('keydown',e=>{
+  if(e.key==='s' || e.key==='S'){
+    const shop=document.getElementById('shop');
+    shop.style.display=shop.style.display==='flex'?'none':'flex';
+  }
+});
+</script>
+</body>
+</html>
