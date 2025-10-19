@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Neon Dash</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;background:#000;overflow:hidden;font-family:'Orbitron',sans-serif;}
+canvas{display:block;margin:0 auto;background:#111;}
+#score{position:absolute;top:10px;left:10px;color:#0ff;font-size:20px;text-shadow:0 0 10px #0ff;}
+#restartBtn{
+    position:absolute;top:10px;right:10px;padding:10px 20px;font-size:16px;background:#0ff;color:#000;border:none;border-radius:5px;cursor:pointer;display:none;
+}
+</style>
+</head>
+<body>
+<canvas id="game" width="600" height="400"></canvas>
+<div id="score">Score: 0</div>
+<button id="restartBtn">Restart</button>
+<script>
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+const restartBtn=document.getElementById('restartBtn');
+
+let player={x:50,y:300,w:30,h:30,vy:0,jumping:false};
+let gravity=0.6;
+let speed=4;
+let obstacles=[];
+let score=0;
+let gameOver=false;
+
+// Saut
+document.addEventListener('keydown',e=>{
+    if(e.code==='Space' && !player.jumping){
+        player.vy=-12;
+        player.jumping=true;
+    }
+});
+
+function spawnObstacle(){
+    const h=30+Math.random()*50;
+    obstacles.push({x:canvas.width,y:canvas.height-h,w:20,h:h});
+}
+
+function update(){
+    if(gameOver)return;
+
+    // Gravité
+    player.vy+=gravity;
+    player.y+=player.vy;
+    if(player.y+player.h>canvas.height){player.y=canvas.height-player.h;player.vy=0;player.jumping=false;}
+
+    // Défilement obstacles
+    obstacles.forEach(o=>o.x-=speed);
+
+    // Collision
+    for(let o of obstacles){
+        if(player.x+player.w>o.x && player.x<o.x+o.w && player.y+player.h>o.y){
+            gameOver=true;
+            restartBtn.style.display='block';
+        }
+    }
+
+    // Nettoyage obstacles
+    obstacles=obstacles.filter(o=>o.x+o.w>0);
+
+    // Spawn aléatoire
+    if(Math.random()<0.02) spawnObstacle();
+
+    // Score
+    score++;
+    document.getElementById('score').innerText='Score: '+score;
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Joueur
+    ctx.fillStyle='red';
+    ctx.fillRect(player.x,player.y,player.w,player.h);
+
+    // Obstacles
+    ctx.fillStyle='cyan';
+    obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
+}
+
+function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+function restartGame(){
+    player={x:50,y:300,w:30,h:30,vy:0,jumping:false};
+    obstacles=[];
+    score=0;
+    gameOver=false;
+    restartBtn.style.display='none';
+}
+
+restartBtn.addEventListener('click',restartGame);
+loop();
+</script>
+</body>
+</html>
