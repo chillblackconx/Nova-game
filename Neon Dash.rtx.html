@@ -22,12 +22,13 @@ const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 const restartBtn=document.getElementById('restartBtn');
 
-let player={x:50,y:300,w:30,h:30,vy:0,jumping:false};
+let player={x:100,y:300,w:30,h:30,vy:0,jumping:false};
 let gravity=0.6;
 let speed=4;
 let obstacles=[];
 let score=0;
 let gameOver=false;
+let frameCount=0;
 
 // Saut
 document.addEventListener('keydown',e=>{
@@ -37,13 +38,17 @@ document.addEventListener('keydown',e=>{
     }
 });
 
+// Génération aléatoire d'obstacles
 function spawnObstacle(){
-    const h=30+Math.random()*50;
+    const h=Math.random()*60 + 20;
     obstacles.push({x:canvas.width,y:canvas.height-h,w:20,h:h});
 }
 
 function update(){
     if(gameOver)return;
+
+    frameCount++;
+    if(frameCount%100===0 && Math.random()<0.8) spawnObstacle(); // obstacles réguliers
 
     // Gravité
     player.vy+=gravity;
@@ -64,9 +69,6 @@ function update(){
     // Nettoyage obstacles
     obstacles=obstacles.filter(o=>o.x+o.w>0);
 
-    // Spawn aléatoire
-    if(Math.random()<0.02) spawnObstacle();
-
     // Score
     score++;
     document.getElementById('score').innerText='Score: '+score;
@@ -82,6 +84,15 @@ function draw(){
     // Obstacles
     ctx.fillStyle='cyan';
     obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
+
+    // Effet de ligne néon (parallaxe)
+    for(let i=0;i<5;i++){
+        ctx.strokeStyle='rgba(0,255,255,'+(0.2+i*0.1)+')';
+        ctx.beginPath();
+        ctx.moveTo(0,50*i + frameCount%50);
+        ctx.lineTo(canvas.width,50*i + frameCount%50);
+        ctx.stroke();
+    }
 }
 
 function loop(){
@@ -91,10 +102,11 @@ function loop(){
 }
 
 function restartGame(){
-    player={x:50,y:300,w:30,h:30,vy:0,jumping:false};
+    player={x:100,y:300,w:30,h:30,vy:0,jumping:false};
     obstacles=[];
     score=0;
     gameOver=false;
+    frameCount=0;
     restartBtn.style.display='none';
 }
 
