@@ -15,22 +15,38 @@ h1{text-align:center;margin-top:40px;font-size:2.5em;color:red;text-shadow:0 0 2
 .box:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 0 25px #ff2a2a;border-color:#ff2a2a;}
 #msg{text-align:center;font-size:1.2em;color:#ff5555;text-shadow:0 0 10px #f00;}
 .cursor{position:fixed;top:0;left:0;width:20px;height:20px;border-radius:50%;background:red;box-shadow:0 0 20px red,0 0 40px red;pointer-events:none;transform:translate(-50%,-50%);transition:transform 0.05s;z-index:10000;}
-.btn-adapter{display:block;margin:20px auto;background:red;color:white;border:none;font-family:'Orbitron';padding:10px 20px;font-size:1.1em;border-radius:8px;cursor:pointer;box-shadow:0 0 20px red;transition:0.2s;}
-.btn-adapter:hover{box-shadow:0 0 40px red;transform:scale(1.05);}
+.btn-adapter, .btn-neon{display:block;margin:20px auto;background:red;color:white;border:none;font-family:'Orbitron';padding:10px 20px;font-size:1.1em;border-radius:8px;cursor:pointer;box-shadow:0 0 20px red;transition:0.2s;}
+.btn-adapter:hover, .btn-neon:hover{box-shadow:0 0 40px red;transform:scale(1.05);}
 </style>
 </head>
 <body>
 <div id="splash">NEON STUDIO</div>
 <h1>Nova Game RTX</h1>
 <button class="btn-adapter" onclick="window.location.href='adapt.html'">Adapter un jeu</button>
+<button class="btn-neon" onclick="changerNeon()">Changer la couleur du neon</button>
 <div id="container"></div>
 <div id="msg"></div>
 <div class="cursor" id="cursor"></div>
 
 <script>
 // Curseur néon
+let neonColor='red';
 const cursor=document.getElementById('cursor');
+function updateCursor(){
+    cursor.style.background=neonColor;
+    cursor.style.boxShadow=`0 0 20px ${neonColor},0 0 40px ${neonColor}`;
+}
 document.addEventListener('mousemove',e=>{cursor.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;});
+updateCursor();
+
+// Changer la couleur du neon
+function changerNeon(){
+    const colors=['red','cyan','magenta','lime','orange','purple'];
+    neonColor=colors[Math.floor(Math.random()*colors.length)];
+    updateCursor();
+    // changer hover et box shadow
+    document.querySelectorAll('.box').forEach(b=>b.style.boxShadow=`0 0 10px ${neonColor}aa`);
+}
 
 // Récupération des jeux depuis game.html
 async function afficherJeux(){
@@ -52,7 +68,7 @@ async function afficherJeux(){
       const box = document.createElement('div');
       box.className='box';
       const name = a.textContent.trim();
-      const href = a.getAttribute('href');
+      const href = a.getAttribute('href'); // pas de /games/
       box.innerHTML=`<h2>${name}</h2><p>Jouer</p>`;
       box.onclick = ()=>window.open(href,'_blank');
       cont.appendChild(box);
