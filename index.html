@@ -91,12 +91,31 @@ body{
   color:#0ff;
   text-shadow:0 0 10px #0ff;
 }
+
+/* Bouton Adapter */
+#adapterBtn{
+  padding:10px 20px;
+  background:#f00;
+  border:none;
+  color:#fff;
+  font-weight:bold;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:20px;
+  transition:0.3s;
+}
+#adapterBtn:hover{
+  background:#ff5555;
+}
 </style>
 </head>
 <body>
 
 <!-- Logo Neon Studio -->
 <div id="logo">Neon Studio</div>
+
+<!-- Bouton Adapter -->
+<button id="adapterBtn">Adapter un jeu</button>
 
 <!-- Grille de jeux -->
 <div id="gameGrid"></div>
@@ -106,7 +125,10 @@ body{
 
 <script>
 // Fade out du logo après 3s
-setTimeout(()=>{document.getElementById('logo').style.opacity='0'; document.getElementById('gameGrid').style.opacity='1';},3000);
+setTimeout(()=>{
+  document.getElementById('logo').style.opacity='0'; 
+  document.getElementById('gameGrid').style.opacity='1';
+},3000);
 
 // Curseur néon rouge qui disparaît après 3s d'inactivité
 const neon=document.getElementById('neonCursor');
@@ -116,6 +138,11 @@ document.addEventListener('mousemove',e=>{
   neon.style.opacity='1';
   clearTimeout(timeout);
   timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000);
+});
+
+// Ouvrir adapt.html
+document.getElementById('adapterBtn').addEventListener('click',()=>{
+  window.location.href='adapt.html';
 });
 
 // Liste des fichiers possibles
