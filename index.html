@@ -28,9 +28,9 @@ body{
 }
 #gameGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:20px;
-  padding:30px;
+  padding:20px;
   opacity:0;
   animation:fadeInGrid 1s forwards 2s;
 }
@@ -41,14 +41,14 @@ body{
   background:#111;
   border:1px solid #f00;
   border-radius:15px;
-  padding:20px;
+  padding:10px;
   cursor:pointer;
   transition:0.3s;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:bold;
-  height:120px;
+  height:100px;
   position:relative;
   overflow:hidden;
 }
@@ -64,7 +64,7 @@ body{
   height:100%;
   pointer-events:none;
   border-radius:15px;
-  opacity:0.3;
+  opacity:0.2;
 }
 iframe{
   border:none;
@@ -98,21 +98,35 @@ iframe{
 <div id="neonCursor"></div>
 
 <script>
-// Curseur néon rouge qui disparaît après 3s d'inactivité
+// Curseur néon rouge qui disparaît après 3s d'inactivité et pulse sur hover
 const neon=document.getElementById('neonCursor');
 let timeout;
-document.addEventListener('mousemove',e=>{
-  neon.style.transform=`translate(${e.clientX-10}px, ${e.clientY-10}px)`;
+
+function showCursor(x,y){
+  neon.style.transform=`translate(${x-10}px, ${y-10}px)`;
   neon.style.opacity='1';
   clearTimeout(timeout);
-  timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000); // disparaît après 3s
+  timeout=setTimeout(()=>{ neon.style.opacity='0'; },3000);
+}
+
+document.addEventListener('mousemove',e=>{
+  showCursor(e.clientX,e.clientY);
 });
 
-// Liste des fichiers jeux .rtx.html valides
+// Liste de nombreux fichiers jeux .rtx.html fictifs pour test
 const allFiles=[
   "Avoider.rtx.html",
   "SpaceShooter.rtx.html",
-  "Puzzle.rtx.html"
+  "Puzzle.rtx.html",
+  "Runner.rtx.html",
+  "Maze.rtx.html",
+  "Jump.rtx.html",
+  "Shooter.rtx.html",
+  "Alien.rtx.html",
+  "Racer.rtx.html",
+  "Clicker.rtx.html",
+  "Tower.rtx.html",
+  "Escape.rtx.html"
 ];
 
 const grid=document.getElementById('gameGrid');
@@ -121,7 +135,7 @@ const frame=document.getElementById('gameFrame');
 // Crée un mini aperçu animé pour chaque box
 function createPreview(box,file){
   const canvas=document.createElement('canvas');
-  canvas.width=200; canvas.height=120;
+  canvas.width=150; canvas.height=100;
   const ctx=canvas.getContext('2d');
   box.appendChild(canvas);
 
@@ -129,8 +143,8 @@ function createPreview(box,file){
   function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle='#f00';
-    ctx.font='20px Arial';
-    ctx.fillText(file.replace('.rtx.html',''),canvas.width/2-50+Math.sin(angle)*10,canvas.height/2+Math.cos(angle)*10);
+    ctx.font='14px Arial';
+    ctx.fillText(file.replace('.rtx.html',''),canvas.width/2-40+Math.sin(angle)*5,canvas.height/2+Math.cos(angle)*5);
     angle+=0.05;
     requestAnimationFrame(animate);
   }
@@ -145,8 +159,21 @@ if(allFiles.length>0){
       box.className='gameBox';
       box.textContent=file.replace('.rtx.html','');
       createPreview(box,file);
+
+      // Pulse curseur sur hover
+      box.addEventListener('mouseenter',()=>{
+        neon.style.transition='transform 0.05s ease-out, opacity 0.2s';
+        neon.style.transform+=' scale(2)';
+        neon.style.boxShadow='0 0 20px #f00,0 0 40px #f00,0 0 60px #f00,0 0 80px #800,0 0 100px #800';
+      });
+      box.addEventListener('mouseleave',()=>{
+        neon.style.transform=neon.style.transform.replace(' scale(2)','');
+        neon.style.boxShadow='0 0 10px #f00,0 0 20px #f00,0 0 30px #f00,0 0 40px #800,0 0 50px #800';
+      });
+
+      // Clique ouvre le jeu dans l'iframe
       box.onclick=()=>{
-        frame.src='games/'+file; // ouvre le jeu dans l'iframe
+        frame.src='games/'+file;
         frame.style.display='block';
         frame.scrollIntoView({behavior:'smooth'});
       };
